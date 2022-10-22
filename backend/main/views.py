@@ -1,20 +1,18 @@
 from django.shortcuts import render, HttpResponse
-from main.models import Categories
+from main.models import AdditionalUserData
 from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework import permissions
-from main.serializers import CategoriesSerializer, UserSerializer
+from main.serializers import AdditionalUserDataSerializer
 
 
 def index(request):
     return HttpResponse('111')
 
 
-class CategoriesViewSet(viewsets.ModelViewSet):
-    queryset = Categories.objects.all()
-    serializer_class = CategoriesSerializer
+class AdditionalUserDataViewSet(viewsets.ModelViewSet):
+    queryset = AdditionalUserData.objects.all()
+    serializer_class = AdditionalUserDataSerializer
+#     permissions_classes = [permissions.IsAuthenticated]
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer

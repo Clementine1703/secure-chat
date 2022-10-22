@@ -55,16 +55,37 @@
 </template>
 
 <script>
+import { useRoute } from 'vue-router';
 import SmallProfile from "@/components/SmallProfile";
 
 export default {
 	name: 'SiteHeader',
+  computed: {
+    current_route_name(){
+      return useRoute().path;
+    },
+  },
   components:{
     SmallProfile
   },
 	props: {
 		msg: String
-	}
+	},
+  data(){
+    return{
+      nav:{
+          elements: [
+            {name: 'Главная'},
+            {name: 'Контакты'},
+            {name: 'Чем мы занимаемся?'},
+            {name: 'Аккаунт'},
+          ],
+      },
+    }
+  },
+  mounted() {
+    // alert(this.current_route_name)
+  },
 }
 </script>
 	

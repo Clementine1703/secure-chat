@@ -1,15 +1,11 @@
-from main.models import Categories
+from main.models import AdditionalUserData
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
 
-class CategoriesSerializer(serializers.HyperlinkedModelSerializer):
+class AdditionalUserDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Categories
+        model = AdditionalUserData
         fields = ['name']
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'password']

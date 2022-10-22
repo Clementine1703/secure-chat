@@ -24,8 +24,6 @@ urlpatterns = [
 urlpatterns += [
     re_path(r'^auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
+    path('', include('main.urls'))
 ]
 
-urlpatterns += [
-    path('captcha/', include('captcha.urls')),
-]

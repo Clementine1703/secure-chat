@@ -1,5 +1,6 @@
 <template>
   <form class="form shadow-lg rounded bg-white mt-5 px-5 py-4 mx-auto" action="#" @submit.prevent='register()'>
+    <standart-preloader v-if = 'loading' ></standart-preloader>
     <h1 class="mb-4 text-center">Регистрация</h1>
     <div class="form-group my-3">
       <input v-model="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите почту">
@@ -23,28 +24,31 @@
 </template>
 
 <script>
+import StandartPreloader from "@/assets/widgets/StandartPreloader";
 
 export default {
 	name: 'RegistrationForm',
   components:{
-
+    StandartPreloader,
   },
   data() {
 		return {
 			email: '',
       password: '',
       status_info: '',
+      loading: false,
 		}
 	},
 	methods: {
 		register() {
+      this.loading = true;
       var axios = require('axios');
       // var FormData = require('form-data');
       // var data = new FormData();
 
       var config = {
         method: 'post',
-        url: 'http://127.0.0.1:8000/auth/users/',
+        url: 'https://clementine1703.pythonanywhere.com/auth/users/',
         mode:'cors',
         // headers: {
           // ...data.getHeaders()
@@ -61,6 +65,9 @@ export default {
           .then((response) => {
             if(JSON.stringify(response.status) === '201'){
               this.status_info = 'Вы успешно зарегистрировались!';
+              setTimeout(()=>{
+                this.$router.push({name: 'authentication'});
+              }, 3000)
 
             }
 
@@ -68,9 +75,17 @@ export default {
           })
           .catch((error) => {
             this.status_info = error.response.data;
+          })
+          .finally(()=>{
+            this.loading = false;
           });
 		},
-	}
+	},
+  mounted() {
+    if (this.$store.state.status.auth){
+      this.$router.push({name: 'main'});
+    }
+  }
 
 }
 </script>
@@ -79,6 +94,7 @@ export default {
 .form {
   width: 400px;
   height: 400px;
+  position: relative;
 }
 
 .checkbox{

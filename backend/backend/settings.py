@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'main',
     'djoser',
     'corsheaders',
-    'captcha',
     'rest_framework',
     'rest_framework.authtoken',
 
@@ -79,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+# WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
@@ -96,6 +95,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 
 

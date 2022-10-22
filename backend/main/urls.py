@@ -5,10 +5,9 @@ from rest_framework import routers
 from main import views
 
 router = routers.DefaultRouter()
-router.register(r'categories', views.CategoriesViewSet)
-router.register(r'user', views.UserViewSet)
+router.register(r'categories', views.AdditionalUserDataViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('api/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api/', include(router.urls)),
+#     path('api/', include('rest_framework.urls', namespace='rest_framework'))
 ]
