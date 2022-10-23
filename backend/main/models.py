@@ -29,7 +29,7 @@ class AdditionalUserData(models.Model):
                          default=JUNIOR,
                          verbose_name = 'Опыт',
                          blank=True)
-    sex = models.CharField(max_length=2, choices=SEX_CHOICES, blank=True, null=True, verbose_name='Гендер');
+    sex = models.CharField(max_length=2, choices=SEX_CHOICES, blank=True, null=True, verbose_name='Гендер')
 
     class Meta:
         verbose_name = 'Данные пользователя'
