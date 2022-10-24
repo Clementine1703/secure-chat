@@ -14,8 +14,11 @@ def index(request):
 
 class AdditionalUserDataViewSet(APIView):
     def get(self, request):
-        data = AdditionalUserData.objects.all()
-        print(request.user.id)
+        data = AdditionalUserData.objects.filter(user_id=request.user.id)
+        print(data)
+        if not data:
+            AdditionalUserData.objects.create(user_id=request.user.id)
+            data = AdditionalUserData.objects.filter(user_id=request.user.id)
         return Response({'user_data': AdditionalUserDataSerializer(data, many=True).data})
     def post(self, request):
         serializer = AdditionalUserDataSerializer(data=request.data)
@@ -23,8 +26,11 @@ class AdditionalUserDataViewSet(APIView):
         new_data, created = AdditionalUserData.objects.update_or_create(user_id=request.user.id, defaults={
             'name': request.data['name'],
             'user_id': request.user.id,
+            'user_status': request.data['user_status'],
+            'sex': request.data['sex'],
+            'experience': request.data['experience'],
+            'date_of_birth': request.data['date_of_birth'],
         })
-        print(new_data)
         return Response({'user_data': AdditionalUserDataSerializer(new_data).data})
 
 

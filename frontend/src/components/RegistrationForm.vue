@@ -48,7 +48,7 @@ export default {
 
       var config = {
         method: 'post',
-        url: 'https://clementine1703.pythonanywhere.com/auth/users/',
+        url: `${this.$store.state.base_url}/auth/users/`,
         mode:'cors',
         // headers: {
           // ...data.getHeaders()

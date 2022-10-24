@@ -8,7 +8,8 @@ export default createStore({
         status:{
             auth: false,
             auth_token: '',
-        }
+        },
+        base_url: 'https://clementine1703.pythonanywhere.com/'
     },
     getters:{},
     actions:{},

@@ -32,6 +32,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 }
 
 .preloader-3 svg {

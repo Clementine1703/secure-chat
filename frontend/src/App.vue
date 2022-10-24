@@ -25,4 +25,9 @@ export default {
 	margin: 0;
 	padding: 0;
 }
+
+root{
+  --main-theme-color-light: #64B687;
+  --main-theme-color-strong: #4F775C;
+}
 </style>

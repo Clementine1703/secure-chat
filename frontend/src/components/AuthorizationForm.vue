@@ -55,7 +55,7 @@ export default {
 
       var config = {
         method: 'post',
-        url: 'https://clementine1703.pythonanywhere.com/auth/token/login/',
+        url: `${this.$store.state.base_url}/auth/token/login/`,
         mode:'cors',
         // headers: {
           // ...data.getHeaders()
