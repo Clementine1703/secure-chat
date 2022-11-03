@@ -15,7 +15,6 @@ def index(request):
 class AdditionalUserDataViewSet(APIView):
     def get(self, request):
         data = AdditionalUserData.objects.filter(user_id=request.user.id)
-        print(data)
         if not data:
             AdditionalUserData.objects.create(user_id=request.user.id)
             data = AdditionalUserData.objects.filter(user_id=request.user.id)
