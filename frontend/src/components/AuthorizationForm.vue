@@ -53,6 +53,8 @@ export default {
       // var FormData = require('form-data');
       // var data = new FormData();
 
+      console.log(email, password)
+
       var config = {
         method: 'post',
         url: `${this.$store.state.base_url}/auth/token/login/`,

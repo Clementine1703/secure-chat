@@ -5,6 +5,7 @@ import AuthorizationForm from "@/components/AuthorizationForm";
 import RegistrationForm from "@/components/RegistrationForm";
 import UserProfile from "@/components/UserProfile";
 import StandartPreloader from "@/assets/widgets/StandartPreloader";
+import MyDialogs from "@/components/MyDialogs";
 
 export default createRouter({
     history: createWebHistory(),
@@ -28,6 +29,11 @@ export default createRouter({
             path: '/profile',
             name: 'profile',
             component: UserProfile,
+        },
+        {
+            path: '/dialogs',
+            name: 'dialogs',
+            component: MyDialogs,
         },
         {
             path: '/preloader',

@@ -1,4 +1,4 @@
-from main.models import AdditionalUserData
+from main.models import AdditionalUserData, Chat, ChatUser, Message
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -11,6 +11,30 @@ class AdditionalUserDataSerializer(serializers.Serializer):
     date_of_registration = serializers.DateTimeField(read_only=True)
     experience = serializers.CharField(max_length=2,read_only=True)
     sex = serializers.CharField(max_length=2,read_only=True)
+
+
+class UsersSearchDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', )
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chat
+        fields = '__all__'
+
+class ChatUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatUser
+        fields = '__all__'
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = '__all__'
+
+
 
 # class AdditionalUserDataSerializer(serializers.ModelSerializer):
 #     class Meta:

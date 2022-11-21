@@ -9,7 +9,7 @@ export default createStore({
             auth: false,
             auth_token: '',
         },
-        base_url: 'https://clementine1703.pythonanywhere.com/'
+        base_url: 'http://127.0.0.1:8000'
     },
     getters:{},
     actions:{},

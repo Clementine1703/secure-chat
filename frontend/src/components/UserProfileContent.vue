@@ -36,9 +36,11 @@
 
           </form>
 
-          <div class="alert alert-success position-absolute mt-3" role="alert" v-if="alert_data">
-            {{ alert_data }}
-          </div>
+          <transition name="fade">
+            <div class="alert alert-success position-absolute mt-3" role="alert" v-if="alert_data">
+              {{ alert_data }}
+            </div>
+          </transition>
         </div>
 
         <div :class="{ show: (active_tab === 2) ,active: (active_tab === 2)}" class="tab-pane fade p-4" role="tabpanel">2</div>
@@ -166,6 +168,14 @@ export default {
   color: var(--bs-btn-hover-color);
   background-color: #4F775C;
   border-color: #4F775C;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to /* .fade-leave-active до версии 2.1.8 */ {
+  opacity: 0;
 }
 
 </style>
