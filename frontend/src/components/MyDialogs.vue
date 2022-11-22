@@ -13,11 +13,18 @@
 
     </div>
     <div class="dialog-details">
-      <div v-for="element in messages" class="dialog-details__message" :class="{'my-message': element.user == my_id, 'float-end': element.user != my_id}" :key="element.message_id">
-          {{element.content}}
+      <div v-for="element in messages" class="dialog-details__message" :class="{'my-message': element.user == my_id, 'float-start': element.user != my_id}" :key="element.message_id">
+          <div class="dialog-details__name">
+            <span class="dialog-details__username"><em>{{ get_name_by_id(element.user) }}</em></span>
+          </div>
+
+          <div class="dialog-details__content">
+            {{element.content}}
+          </div>
+          
       </div>
       <form action="#" @submit.prevent="post_message(active_chat, new_message)" class="new-message-form">
-        <input type="text" v-model="new_message" placeholder="Текст сообщения">
+        <input type="text" v-model="new_message" placeholder="Текст сообщения" @input.prevent required>
         <button>Отправить</button>
       </form>
       
@@ -40,7 +47,7 @@ export default {
   computed:{
     friends_count(){
       return this.friends.users.length;
-    }
+    },
   },
   data(){
     return {
@@ -49,11 +56,9 @@ export default {
       axios_response: '',
       my_id: 0,
       active_chat: false,
+      active_chat_users: [],
       new_message: '',
     }
-  },
-  mounted() {
-    this.get_dialogs();
   },
   methods:{
     get_dialogs(){
@@ -74,7 +79,6 @@ export default {
               this.chats.push(result[i]);
             }
             this.changeActiveChat(result[0].chat)
-            this.get_messages(result[0].chat)
 
           })
           .catch((error) => {
@@ -82,9 +86,8 @@ export default {
           })
     },
 
-    get_messages(chat_id){
-      axios(
-          {
+    get_messages(chat_id, check_updates = false){
+      let config = {
             method: 'post',
             url: `${this.$store.state.base_url}/api/message/get`,
             mode: 'cors',
@@ -93,18 +96,21 @@ export default {
             },
             data:{
               chat_id: chat_id,
+              check_updates: check_updates,
             },
 
           }
-      )
+
+      axios(config)
           .then((response) => {
             let result = response.data.messages;
-            this.messages = []
-            for (let i in result){
+            if (result.length){
+              for (let i in result){
               this.messages.push(result[i]);
+              }
+              this.my_id = response.data.your_id
+              this.active_chat_users = response.data.users
             }
-            this.my_id = response.data.your_id
-
           })
           .catch((error) => {
             alert(error)
@@ -127,8 +133,9 @@ export default {
 
           }
       )
-          .then(() => {
-            this.get_messages(chat_id)
+          .then((request) => {
+            this.get_messages(chat_id, true)
+            this.messages.push(request.data)
             this.new_message = ''
           })
           .catch((error) => {
@@ -139,8 +146,23 @@ export default {
     changeActiveChat(id){
       this.active_chat = id
       this.get_messages(id)
+    },
+    get_name_by_id(id){
+      let users = this.active_chat_users
+      for (let i = 0; i < users.length; i++){
+        if (users[i].user == id){
+          return(users[i].username)
+        }
+      }
     }
-  }
+  },
+
+  mounted() {
+    this.get_dialogs();
+    setInterval(()=>{
+      this.get_messages(this.active_chat, true)
+    }, 1000)
+  },
 
 
 }
@@ -180,14 +202,6 @@ export default {
     color: white;
   }
 
-  
-
-  .dialog-shortcuts__name{
-  }
-
-  .dialog-shortcuts__last-message{
-  }
-
   .dialog-details{
     position: relative;
     overflow: auto;
@@ -199,22 +213,23 @@ export default {
 
   .dialog-details__message{
     position: relative;
-    min-width: 30%;
+    min-width: min-content;
     max-width: 70%;
     min-height: 40px;
     background-color: rgb(100, 182, 135);
     border-radius: 9px;
     padding: 10px 20px;
-    margin: 30px;
+    margin: 10px 30px;
     color: white;
     margin-bottom: 30px;
     clear: both;
+    float: right;
   }
 
 
   
 
-  .dialog-details__message::before{
+  .dialog-details__message:not(.my-message)::before{
     content: '';
     position: absolute;
     width: 0;
@@ -222,10 +237,10 @@ export default {
     border: 15px transparent solid;
     border-top: 15px rgb(100, 182, 135) solid;
     bottom: -25px;
-    right: 30px;
+    left: 20px;
   }
 
-  .dialog-details__message.my-message::before{
+  .dialog-details__message.my-message::after{
     content: '';
     position: absolute;
     width: 0;
@@ -233,11 +248,16 @@ export default {
     border: 15px transparent solid;
     border-top: 15px rgb(100, 182, 135) solid;
     bottom: -25px;
-    left: 30px;
+    right: 20px;
+  }
+
+  .dialog-details__username{
+    font-size: 20px;
+    font-weight: 900;
   }
 
   .new-message-form{
-    position: relative;
+    position: sticky;
     display: flex;
     width: 100%;
     height: 40px;

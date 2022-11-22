@@ -75,6 +75,7 @@ class Message(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='id пользователя')
     content = models.CharField(max_length=500, verbose_name='контент')
     date_create = models.DateTimeField(editable=False, auto_now_add=True, verbose_name='дата создания')
+    read = models.BooleanField(default=False, verbose_name="Прочитано")
 
     class Meta:
         verbose_name = 'Список сообщений'

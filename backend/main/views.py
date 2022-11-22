@@ -25,13 +25,29 @@ class ChatViewSet(APIView):
 
 class MessageViewSet(APIView):
     def post(self, request):
-        messages = Message.objects.filter(chat_id=request.data['chat_id'])
-        return(Response({'messages': MessageSerializer(messages, many=True).data, 'your_id': request.user.id}))
+        users = []
+        for element in ChatUser.objects.filter(chat_id=request.data['chat_id']):
+            users.append({'username': element.user.username, 'user': element.user.id})
+
+
+        if (request.data['check_updates']):
+            messages = Message.objects.filter(chat_id=request.data['chat_id'], read=False).exclude(user = User.objects.get(id=request.user.id))
+            for message in messages:
+                message.read = True
+                message.save()
+        else:
+            messages = Message.objects.filter(chat_id=request.data['chat_id'])
+        
+        # Добавляем поле username в сообщение
+        # for
+
+
+        return(Response({'messages': MessageSerializer(messages, many=True).data, 'your_id': request.user.id, 'users': users}))
 
 class NewMessageViewSet(APIView):
     def post(self, request):
         print(request.data)
-        message = Message(chat_id=request.data['chat_id'], content=request.data['content'], user_id=request.user.id)
+        message = Message(chat_id=request.data['chat_id'], content=request.data['content'], user_id=request.user.id, read=False)
         message.save()
         return Response(MessageSerializer(message).data)
 
