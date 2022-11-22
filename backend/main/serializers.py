@@ -30,6 +30,7 @@ class ChatUserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MessageSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username')
     class Meta:
         model = Message
         fields = '__all__'

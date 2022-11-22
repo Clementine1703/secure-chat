@@ -13,9 +13,9 @@
 
     </div>
     <div class="dialog-details">
-      <div v-for="element in messages" class="dialog-details__message" :class="{'my-message': element.user == my_id, 'float-start': element.user != my_id}" :key="element.message_id">
+      <div v-for="element in messages" class="dialog-details__message" :class="{'my-message': element.user == me, 'float-start': element.user != me}" :key="element.message_id">
           <div class="dialog-details__name">
-            <span class="dialog-details__username"><em>{{ get_name_by_id(element.user) }}</em></span>
+            <span class="dialog-details__username"><em>{{ element.user }}</em></span>
           </div>
 
           <div class="dialog-details__content">
@@ -48,19 +48,22 @@ export default {
     friends_count(){
       return this.friends.users.length;
     },
+    
+
   },
   data(){
     return {
       chats:[],
       messages:[],
       axios_response: '',
-      my_id: 0,
+      me: '', //логин пользователя
       active_chat: false,
-      active_chat_users: [],
       new_message: '',
     }
   },
   methods:{
+
+    //получаем список диалогов
     get_dialogs(){
       axios(
           {
@@ -86,6 +89,7 @@ export default {
           })
     },
 
+    //check_updates=true -- мы берем только непрочитанные сообщения
     get_messages(chat_id, check_updates = false){
       let config = {
             method: 'post',
@@ -104,12 +108,14 @@ export default {
       axios(config)
           .then((response) => {
             let result = response.data.messages;
+            //если есть новое сообщение
             if (result.length){
               for (let i in result){
               this.messages.push(result[i]);
               }
-              this.my_id = response.data.your_id
-              this.active_chat_users = response.data.users
+
+              //запоминаем свой id
+              this.me = response.data.me
             }
           })
           .catch((error) => {
@@ -134,6 +140,7 @@ export default {
           }
       )
           .then((request) => {
+            //получаем непрочитанные сообщения
             this.get_messages(chat_id, true)
             this.messages.push(request.data)
             this.new_message = ''
@@ -145,20 +152,15 @@ export default {
 
     changeActiveChat(id){
       this.active_chat = id
+      this.messages = []
       this.get_messages(id)
     },
-    get_name_by_id(id){
-      let users = this.active_chat_users
-      for (let i = 0; i < users.length; i++){
-        if (users[i].user == id){
-          return(users[i].username)
-        }
-      }
-    }
   },
 
   mounted() {
     this.get_dialogs();
+
+    // устанавливаем ежесекундный запрос к серверу проверяющий наличие обновлений
     setInterval(()=>{
       this.get_messages(this.active_chat, true)
     }, 1000)

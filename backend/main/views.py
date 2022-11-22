@@ -25,11 +25,8 @@ class ChatViewSet(APIView):
 
 class MessageViewSet(APIView):
     def post(self, request):
-        users = []
-        for element in ChatUser.objects.filter(chat_id=request.data['chat_id']):
-            users.append({'username': element.user.username, 'user': element.user.id})
 
-
+        #check_updates = True, значит возвращаем только сообщения с read = False, Иначе возвращаем все сообщения
         if (request.data['check_updates']):
             messages = Message.objects.filter(chat_id=request.data['chat_id'], read=False).exclude(user = User.objects.get(id=request.user.id))
             for message in messages:
@@ -42,7 +39,7 @@ class MessageViewSet(APIView):
         # for
 
 
-        return(Response({'messages': MessageSerializer(messages, many=True).data, 'your_id': request.user.id, 'users': users}))
+        return(Response({'messages': MessageSerializer(messages, many=True).data, 'me': request.user.username}))
 
 class NewMessageViewSet(APIView):
     def post(self, request):
