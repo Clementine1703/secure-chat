@@ -18,9 +18,12 @@ class UsersSearchViewSet(APIView):
         return Response({'response': UsersSearchDataSerializer(data, many=True).data})
 
 class ChatViewSet(APIView):
-    def get(self, request):
+    def post(self, request):
+        print(request.data)
+        chat_name = request.data['chat_name']
         chats = ChatUser.objects.filter(user_id=request.user.id)
-        chats = [i.chat for i in chats]
+        chats = [i.chat for i in chats if i.chat.name.startswith(chat_name)]
+        
         return(Response(ChatSerializer(chats, many=True).data))
 
 class MessageViewSet(APIView):
