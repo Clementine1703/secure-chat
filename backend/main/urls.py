@@ -13,6 +13,10 @@ urlpatterns = [
     path('api/chat/get', views.ChatViewSet.as_view()),
     path('api/message/get', views.MessageViewSet.as_view()),
     path('api/message/post', views.NewMessageViewSet.as_view()),
+    path('api/message/read', views.ReadMessageViewSet.as_view()),
+    path('api/friends/newrequest', views.FriendRequestViewSet.as_view()),
+    path('api/friends/accept', views.FriendViewSet.as_view()),
+    path('api/friends/remove', views.RemoveFriendViewSet.as_view()),
 
     # path('api/', include(router.urls)),
 #     path('api/', include('rest_framework.urls', namespace='rest_framework'))

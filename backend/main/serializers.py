@@ -1,4 +1,4 @@
-from main.models import AdditionalUserData, Chat, ChatUser, Message
+from main.models import AdditionalUserData, Chat, ChatUser, Message, FriendRequest, Friend
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -29,19 +29,23 @@ class ChatUserSerializer(serializers.ModelSerializer):
         model = ChatUser
         fields = '__all__'
 
+class FriendRequestSerializer(serializers.ModelSerializer):
+    recipient = serializers.CharField(source='recipient.username')
+    sender = serializers.CharField(source='sender.username')
+    class Meta:
+        model = FriendRequest
+        fields = '__all__'
+
+class FriendSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username')
+    friend = serializers.CharField(source='friend.username')
+    class Meta:
+        model = Friend
+        fields = '__all__'
+
 class MessageSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
+    you_read = serializers.BooleanField(default=False, read_only=True)
     class Meta:
         model = Message
         fields = '__all__'
-
-
-
-# class AdditionalUserDataSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = AdditionalUserData
-#         fields = ('user_id', 'name', 'user_status', 'date_of_birth', 'date_of_registration', 'experience', 'sex', )
-
-
-
-

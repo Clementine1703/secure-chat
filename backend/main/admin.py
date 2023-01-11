@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AdditionalUserData, ChatUser, Chat, Message
+from .models import AdditionalUserData, ChatUser, Chat, Message, Friend, FriendRequest
 
 
 @admin.register(AdditionalUserData)
@@ -16,5 +16,13 @@ class ChatParticipantListsAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageListsAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Friend)
+class FriendAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(FriendRequest)
+class FriendRequestAdmin(admin.ModelAdmin):
     pass
 

@@ -38,14 +38,14 @@ class AdditionalUserData(models.Model):
         verbose_name_plural = "Данные пользователей"
 
     def __str__(self):
-        return 'Данные'
+        return f'Данные {self.user.username}'
 
 
 # Списки чатов
 class Chat(models.Model):
     chat = models.AutoField(primary_key=True, verbose_name='id чата')
     name = models.CharField(max_length=50, verbose_name='Название чата')
-    last_modified_date = models.DateTimeField(blank=True)
+    last_modified_date = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Список чатов'
@@ -75,12 +75,58 @@ class Message(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='id пользователя')
     content = models.CharField(max_length=500, verbose_name='контент')
     date_create = models.DateTimeField(editable=False, auto_now_add=True, verbose_name='дата создания')
-    read = models.BooleanField(default=False, verbose_name="Прочитано")
+    read = models.BooleanField(default=False, verbose_name="прочитано")
 
     class Meta:
         verbose_name = 'Список сообщений'
         verbose_name_plural = "Список сообщений"
 
     def __str__(self):
-        return self.chat.name
+        return self.content
+
+class UserReceivedMessage(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='id чата')
+    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='id пользователя')
+
+    class Meta:
+        verbose_name = 'Пользователи получившие сообщение'
+        verbose_name_plural = 'Пользователи получившие сообщение'
+
+    def __str__(self):
+        return self.user
+
+class UserReadedMessage(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='id чата')
+    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='id пользователя')
+
+    class Meta:
+        verbose_name = 'Пользователи прочитавшие сообщение'
+        verbose_name_plural = 'Пользователи прочитавшие сообщение'
+
+    def __str__(self):
+        return self.user
+    
+
+class FriendRequest(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='получатель заявки', related_name='+')
+    sender = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='отправитель заявки')
+
+    class Meta:
+        verbose_name = 'Заявка в друзья'
+        verbose_name_plural = 'Заявки в друзья'
+
+    def __str__(self):
+        return self.sender.username
+
+class Friend(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='пользователь')
+    friend = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='отправитель заявки', related_name='+')
+
+    class Meta:
+        verbose_name = 'Друг'
+        verbose_name_plural = 'Друзья'
+
+    def __str__(self):
+        return f'акт дружбы {self.user} и {self.friend}' 
+
 
