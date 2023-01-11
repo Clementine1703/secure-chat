@@ -6,6 +6,8 @@ import RegistrationForm from "@/components/RegistrationForm";
 import UserProfile from "@/components/UserProfile";
 import StandartPreloader from "@/assets/widgets/StandartPreloader";
 import MyDialogs from "@/components/MyDialogs";
+import MyFriends from "@/components/MyFriends";
+import ActiveDialog from "@/components/ActiveDialog";
 
 export default createRouter({
     history: createWebHistory(),
@@ -14,6 +16,21 @@ export default createRouter({
             path: '/',
             name: 'main',
             component: HomePage,
+            children: [{
+                path: '/dialogs',
+                name: 'dialogs',
+                component: MyDialogs,
+              },
+              {
+                path: '/dialogs/:id',
+                name: 'active-dialog',
+                component: ActiveDialog,
+                },
+              {
+                path: '/friends',
+                name: 'friends',
+                component: MyFriends,
+              },],
         },
         {
             path: '/authentication',
@@ -30,11 +47,11 @@ export default createRouter({
             name: 'profile',
             component: UserProfile,
         },
-        {
-            path: '/dialogs',
-            name: 'dialogs',
-            component: MyDialogs,
-        },
+        // {
+        //     path: '/dialogs',
+        //     name: 'dialogs',
+        //     component: MyDialogs,
+        // },
         {
             path: '/preloader',
             name: 'preloader',

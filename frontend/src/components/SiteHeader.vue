@@ -14,21 +14,21 @@
 				<div class="offcanvas-body">
 					<ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
 						<li class="nav-item" >
-							<router-link class="nav-link active" aria-current="page" :to="{name: 'main'}">Главная</router-link>
+							<router-link class="nav-link active" aria-current="page" :to="{name: 'main'}" v-if="!this.$store.state.auth_token">Главная</router-link>
 						</li>
             <li class="nav-item" >
               <router-link class="nav-link active" aria-current="page" :to="{name: 'dialogs'}">Сообщения</router-link>
             </li>
-            <li class="nav-item offset-lg-2">
+            <li class="nav-item offset-lg-2" v-if="this.$store.state.auth_token">
               <form class="form-inline d-flex" @submit.prevent>
                 <input v-model="users_search_value" class="form-control mr-sm-2" type="search" placeholder="Пользователь" aria-label="Search">
                 <button class="btn btn-outline-success my-2 my-sm-0" @click="get_profile(users_search_value)">Искать</button>
               </form>
             </li>
-						<li class="nav-item" v-show="!this.$store.state.status.auth">
+						<li class="nav-item" v-show="!this.$store.state.auth_token">
 							<a class="nav-link" href="#">Контакты</a>
 						</li>
-						<li class="nav-item dropdown me-lg-3" v-show="!this.$store.state.status.auth">
+						<li class="nav-item dropdown me-lg-3" v-if="!this.$store.state.auth_token">
 							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
 								aria-expanded="false">
 								Чем мы занимаемся?
@@ -43,9 +43,9 @@
 							</ul>
 						</li>
 
-						<li class="nav-item ms-lg-3" v-if="!this.$store.state.status.auth"><router-link :to="{name: 'authentication'}"><a class="nav-link" href="#">Войти</a></router-link>
+						<li class="nav-item ms-lg-3" v-if="!this.$store.state.auth_token"><router-link :to="{name: 'authentication'}"><a class="nav-link" href="#">Войти</a></router-link>
 						</li>
-						<li class="nav-item" v-if="!this.$store.state.status.auth"><router-link :to="{name: 'registration'}"><a class="nav-link" href="#">Зарегистрироваться</a></router-link>
+						<li class="nav-item" v-if="!this.$store.state.auth_token"><router-link :to="{name: 'registration'}"><a class="nav-link" href="#">Зарегистрироваться</a></router-link>
 						</li>
             <li class="nav-item dropdown offset-lg-1" v-else><small-profile></small-profile>
             </li>
@@ -101,7 +101,7 @@ export default {
             url: `${this.$store.state.base_url}/api/profiles/`,
             mode: 'cors',
             headers: {
-              Authorization: `Token ${this.$store.state.status.auth_token}`,
+              Authorization: `Token ${this.$store.state.auth_token}`,
             },
             data: {
               'value': value,
@@ -122,7 +122,7 @@ export default {
 	
 <style scoped>
 .header {
-	margin-bottom: 56px;
+	
 }
 
 .header-space{

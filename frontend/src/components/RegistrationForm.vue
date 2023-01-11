@@ -1,9 +1,9 @@
 <template>
   <form class="form shadow-lg rounded bg-white mt-5 px-5 py-4 mx-auto" action="#" @submit.prevent='register()'>
-    <standart-preloader v-if = 'loading' ></standart-preloader>
+    <standart-preloader v-if='loading' ></standart-preloader>
     <h1 class="mb-4 text-center">Регистрация</h1>
     <div class="form-group my-3">
-      <input v-model="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите почту">
+      <input v-model="email" type="text" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите почту">
     </div>
     <div class="form-group my-3">
       <input v-model="password" type="password" class="form-control" id="password" placeholder="Пароль">

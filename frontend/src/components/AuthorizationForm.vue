@@ -3,7 +3,7 @@
     <standart-preloader v-if="loading" ></standart-preloader>
       <h1 class="mb-4 text-center">Вход</h1>
       <div class="form-group my-3">
-        <input v-model="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите почту">
+        <input v-model="email" type="text" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите почту">
       </div>
       <div class="form-group my-3">
         <input v-model="password" type="password" class="form-control" id="password" placeholder="Пароль">
@@ -50,8 +50,6 @@ export default {
 		sign_in(email, password) {
       this.loading = true;
       var axios = require('axios');
-      // var FormData = require('form-data');
-      // var data = new FormData();
 
       console.log(email, password)
 
@@ -59,9 +57,6 @@ export default {
         method: 'post',
         url: `${this.$store.state.base_url}/auth/token/login/`,
         mode:'cors',
-        // headers: {
-          // ...data.getHeaders()
-        // },
         data : {
           'username': email,
           'password': password,
@@ -71,10 +66,8 @@ export default {
 
       axios(config)
           .then((response) => {
-            this.$store.state.status.auth = true;
-            this.$store.state.status.auth_token = response.data.auth_token;
-            this.$cookies.set('auth_token', this.$store.state.status.auth_token);
-            this.status_info = 'Вы успешно залогинились!';
+            this.$store.state.auth_token = response.data.auth_token;
+            this.$cookies.set('auth_token', this.$store.state.auth_token);
             this.$cookies.set('auto_login', '');
             this.$cookies.set('auto_password', '')
             if (this.remember_me){
@@ -93,7 +86,7 @@ export default {
 		},
 	},
   mounted() {
-    if (this.$store.state.status.auth){
+    if (this.$store.state.auth_token){
       this.$router.push({name: 'main'});
     }
     try {

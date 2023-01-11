@@ -22,8 +22,7 @@ export default {
   components:{},
   methods:{
     logout(){
-      this.$store.state.status.auth = false;
-      this.$store.state.status.auth_token = '';
+      this.$store.state.auth_token = '';
       this.$cookies.remove('auth_token');
       this.$router.push({name: 'authentication'});
       // this.$cookies.remove('auto_login');

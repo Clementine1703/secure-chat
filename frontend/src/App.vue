@@ -13,8 +13,7 @@ export default {
 	},
   mounted() {
     if (this.$cookies.get('auth_token')){
-      this.$store.state.status.auth = true;
-      this.$store.state.status.auth_token = this.$cookies.get('auth_token');
+      this.$store.state.auth_token = this.$cookies.get('auth_token');
     }
   }
 }
