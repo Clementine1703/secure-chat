@@ -1,7 +1,7 @@
 <template>
 
   <div class="container" >
-    <div class="dialog-details">
+    <div class="dialog-details" ref="dialogDetails">
       <div 
         v-for="element in messages" 
         class="dialog-details__message" 
@@ -61,13 +61,19 @@ export default {
             }
         
     },
+    //скроллим чат в конец
+    scrollChatToBottom(){
+      this.$refs.dialogDetails.scrollTo(
+        0, this.$refs.dialogDetails.scrollHeight
+      )
+    },
     
     //получаем сообщения
     //check_updates=true -- мы берем только непрочитанные сообщения
     get_messages(chat_id, check_updates = false){
       let config = {
             method: 'post',
-            url: `${this.$store.state.base_url}/api/message/get`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/message/get`,
             mode: 'cors',
             headers: {
               Authorization: `Token ${this.$store.state.auth_token}`,
@@ -102,7 +108,7 @@ export default {
       axios(
           {
             method: 'post',
-            url: `${this.$store.state.base_url}/api/message/post`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/message/post`,
             mode: 'cors',
             headers: {
               Authorization: `Token ${this.$store.state.auth_token}`,
@@ -120,6 +126,7 @@ export default {
             request.data.you_read = true
             this.messages.push(request.data)
             this.new_message = ''
+            this.scrollChatToBottom()
           })
           .catch((error) => {
             alert(error)
@@ -131,7 +138,7 @@ export default {
       axios(
           {
             method: 'post',
-            url: `${this.$store.state.base_url}/api/message/read`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/message/read`,
             mode: 'cors',
             headers: {
               Authorization: `Token ${this.$store.state.auth_token}`,

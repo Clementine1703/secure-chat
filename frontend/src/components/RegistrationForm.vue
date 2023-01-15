@@ -48,7 +48,7 @@ export default {
 
       var config = {
         method: 'post',
-        url: `${this.$store.state.base_url}/auth/users/`,
+        url: `${this.$store.state.protocol}${this.$store.state.base_url}/auth/users/`,
         mode:'cors',
         // headers: {
           // ...data.getHeaders()
@@ -82,7 +82,7 @@ export default {
 		},
 	},
   mounted() {
-    if (this.$store.state.status.auth){
+    if (this.$store.state.auth_token){
       this.$router.push({name: 'main'});
     }
   }

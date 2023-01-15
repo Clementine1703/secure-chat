@@ -55,7 +55,7 @@ export default {
 
       var config = {
         method: 'post',
-        url: `${this.$store.state.base_url}/auth/token/login/`,
+        url: `${this.$store.state.protocol}${this.$store.state.base_url}/auth/token/login/`,
         mode:'cors',
         data : {
           'username': email,

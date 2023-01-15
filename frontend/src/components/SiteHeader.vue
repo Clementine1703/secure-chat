@@ -98,7 +98,7 @@ export default {
       axios(
           {
             method: 'post',
-            url: `${this.$store.state.base_url}/api/profiles/`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/profiles/`,
             mode: 'cors',
             headers: {
               Authorization: `Token ${this.$store.state.auth_token}`,

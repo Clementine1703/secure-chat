@@ -82,10 +82,10 @@ export default {
       axios(
           {
             method: 'get',
-            url: `${this.$store.state.base_url}/api/`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/`,
             mode: 'cors',
             headers: {
-              Authorization: `Token ${this.$store.state.status.auth_token}`,
+              Authorization: `Token ${this.$store.state.auth_token}`,
             }
           }
       )
@@ -111,10 +111,10 @@ export default {
       axios(
           {
             method: 'post',
-            url: `${this.$store.state.base_url}/api/`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/`,
             mode: 'cors',
             headers: {
-              Authorization: `Token ${this.$store.state.status.auth_token}`,
+              Authorization: `Token ${this.$store.state.auth_token}`,
             },
             data: {
               name: this.profile_data.name,

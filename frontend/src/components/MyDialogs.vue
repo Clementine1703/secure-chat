@@ -62,7 +62,7 @@ export default {
       axios(
           {
             method: 'post',
-            url: `${this.$store.state.base_url}/api/chat/get`,
+            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/chat/get`,
             mode: 'cors',
             headers: {
               Authorization: `Token ${this.$store.state.auth_token}`,
@@ -84,6 +84,8 @@ export default {
             alert('Ошибка запроса к серверу');
           })
     }, 
+
+    
   },
 
   mounted() {
@@ -91,22 +93,6 @@ export default {
       this.get_dialogs();
     }
   },
-  created(){
-    const chatSocket = new WebSocket(
-            'ws://127.0.0.1:8000/chat/'
-        );
-
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            alert(data.message)
-        };
-
-        chatSocket.onclose = function() {
-            console.error('Chat socket closed unexpectedly');
-        };
-  }
-
-
 }
 
 </script>

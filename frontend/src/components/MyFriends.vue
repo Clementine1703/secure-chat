@@ -48,10 +48,10 @@
           axios(
             {
               method: 'post',
-              url: `${this.$store.state.base_url}/api/profiles/`,
+              url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/profiles/`,
               mode: 'cors',
               headers: {
-                Authorization: `Token ${this.$store.state.status.auth_token}`,
+                Authorization: `Token ${this.$store.state.auth_token}`,
               },
               data: {
                 'value': value,
@@ -69,10 +69,10 @@
           axios(
             {
               method: 'post',
-              url: `${this.$store.state.base_url}/api/friends/newrequest`,
+              url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/friends/newrequest`,
               mode: 'cors',
               headers: {
-                Authorization: `Token ${this.$store.state.status.auth_token}`,
+                Authorization: `Token ${this.$store.state.auth_token}`,
               },
               data: {
                 'username': username,
@@ -95,10 +95,10 @@
           axios(
             {
               method: 'post',
-              url: `${this.$store.state.base_url}/api/friends/newrequest`,
+              url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/friends/newrequest`,
               mode: 'cors',
               headers: {
-                Authorization: `Token ${this.$store.state.status.auth_token}`,
+                Authorization: `Token ${this.$store.state.auth_token}`,
               },
               data: {
                 'username': '',
@@ -117,10 +117,10 @@
           axios(
             {
               method: 'post',
-              url: `${this.$store.state.base_url}/api/friends/accept`,
+              url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/friends/accept`,
               mode: 'cors',
               headers: {
-                Authorization: `Token ${this.$store.state.status.auth_token}`,
+                Authorization: `Token ${this.$store.state.auth_token}`,
               },
               data: {
                 'id': id,
@@ -144,10 +144,10 @@
           axios(
             {
               method: 'post',
-              url: `${this.$store.state.base_url}/api/friends/remove`,
+              url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/friends/remove`,
               mode: 'cors',
               headers: {
-                Authorization: `Token ${this.$store.state.status.auth_token}`,
+                Authorization: `Token ${this.$store.state.auth_token}`,
               },
               data: {
                 'id': id,
@@ -171,10 +171,10 @@
           axios(
             {
               method: 'get',
-              url: `${this.$store.state.base_url}/api/friends/accept`,
+              url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/friends/accept`,
               mode: 'cors',
               headers: {
-                Authorization: `Token ${this.$store.state.status.auth_token}`,
+                Authorization: `Token ${this.$store.state.auth_token}`,
               }
             }
           )
