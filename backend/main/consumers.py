@@ -24,16 +24,20 @@ class ChatConsumer(WebsocketConsumer):
         if (model_token):
             self.user = model_token[0].user
             self.accept()
-            self.send(text_data=json.dumps({"message": self.user.group_id}))
+            self.send(text_data=json.dumps({"message": self.channel_name}))
+            print(self.channel_layer)
+
+            #Вступаем  в группу
+            async_to_sync(self.channel_layer.group_add)(
+            'user_1', self.channel_name
+        )
         
 
     
     def disconnect(self, close_code):
-        pass
-        # Leave room group
-        # async_to_sync(self.channel_layer.group_discard)(
-        #     self.room_group_name, self.channel_name
-        # )
+        async_to_sync(self.channel_layer.group_discard)(
+            'user_1', self.channel_name
+        )
 
     # Receive message from WebSocket
     
@@ -42,16 +46,26 @@ class ChatConsumer(WebsocketConsumer):
         print(self.user)
         self.send(text_data=json.dumps({"message": text_data_json}))
         print('click')
+
+        #отправка сообщения одному каналу
+        async_to_sync(self.channel_layer.send)(
+            self.channel_name,
+            {
+                "type": "chat.message",
+                "message": "Hello there!",
+            }
+        )
         # message = text_data_json["message"]
 
-        # # Send message to room group
-        # async_to_sync(self.channel_layer.group_send)(
-        #     self.room_group_name, {"type": "chat_message", "message": message}
-        # )
+        #отправка сообщения группе
+        async_to_sync(self.channel_layer.group_send)(
+            'user_1', {"type": "chat_message", "message": 'сообщение из группы'}
+        )
 
     # Receive message from room group
     def chat_message(self, event):
         message = event["message"]
+        print(message)
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({"message": message}))
