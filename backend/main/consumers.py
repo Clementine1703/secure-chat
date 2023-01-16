@@ -5,6 +5,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from main.serializers import UsersSearchDataSerializer
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -42,28 +43,27 @@ class ChatConsumer(WebsocketConsumer):
     # Receive message from WebSocket
     
     def receive(self, text_data):
-        text_data_json = text_data
-        print(self.user)
-        self.send(text_data=json.dumps({"message": text_data_json}))
-        print('click')
+        data = json.loads(text_data)
+        # self.send(text_data=json.dumps({"message": data}))
 
-        #отправка сообщения одному каналу
-        async_to_sync(self.channel_layer.send)(
-            self.channel_name,
-            {
-                "type": "chat.message",
-                "message": "Hello there!",
-            }
-        )
-        # message = text_data_json["message"]
+        if (data['type'] == 'friend' and data['action'] == 'send_request'):
+            username = data['target']
+            user = User.objects.filter(username=username)[0]
+            serialized_user = UsersSearchDataSerializer(user).data
 
-        #отправка сообщения группе
-        async_to_sync(self.channel_layer.group_send)(
-            'user_1', {"type": "chat_message", "message": 'сообщение из группы'}
+            async_to_sync(self.channel_layer.group_send)(
+            'user_1', {"type": "friends_request", "message": f'Вас добавил в друзья {serialized_user}'}
         )
 
     # Receive message from room group
     def chat_message(self, event):
+        message = event["message"]
+        print(message)
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({"message": message}))
+
+    def friends_request(self, event):
         message = event["message"]
         print(message)
 
