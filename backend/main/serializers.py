@@ -37,11 +37,11 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class FriendSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source='user.username')
+    # user = serializers.CharField(source='user.username')
     friend = serializers.CharField(source='friend.username')
     class Meta:
         model = Friend
-        fields = '__all__'
+        fields = ['friend']
 
 class MessageSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')

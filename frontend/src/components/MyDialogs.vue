@@ -133,11 +133,8 @@ export default {
   }
 
   .dialog-shortcuts__item:hover{
-
-  }
-
-  .dialog-shortcuts__item.active{
-    background-color: rgb(100, 182, 135);
+    background-color: rgb(36, 88, 58);
     color: white;
   }
+
 </style>

@@ -5,6 +5,10 @@ export default createStore({
         data:{
             user: 'user',
             websocket_connection: false,
+            friends:{
+                friends:[],
+                friend_requests:[]
+            }
         },
         auth_token: '',
         protocol: 'http://',

@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from main.serializers import AdditionalUserDataSerializer, UsersSearchDataSerializer, ChatSerializer, ChatUserSerializer, MessageSerializer, FriendRequestSerializer, FriendSerializer
 from main.models import AdditionalUserData, Chat, ChatUser, Message, UserReadedMessage, UserReceivedMessage, FriendRequest, Friend
 
-
 def get_users_by_string(request):
     data = User.objects.filter(
         username__startswith=request.data['value']).exclude(id=request.user.id)
@@ -23,8 +22,23 @@ def get_not_read_messages(request):
         user=User.objects.get(id=request.user.id))
     # в момент получения сообщения помечаем его как "прочитанное", чтобы больше не получать его при подобном запросе (временно)
     for message in messages:
-        message.read = True
-        message.save()
+        user = User.objects.get(id=request.user.id)
+        message_readed = UserReadedMessage.objects.filter(message=message, user=user)
+        if (message_readed):
+            message.delete()
+        else:
+            write = UserReadedMessage(user=user, message=message)
+            write.save()
+        print(user.username)
+        print(len(ChatUser.objects.filter(chat=request.data['chat_id'])))
+        print(len(UserReadedMessage.objects.filter(message=message)))
+
+        if len(ChatUser.objects.filter(chat=request.data['chat_id'])) == len(UserReadedMessage.objects.filter(message=message)):
+
+            message.read = True
+            message.save()
+            print('AAAAAAAAAAAAA')
+
     return messages
 
 
@@ -68,15 +82,15 @@ def get_user_data(request):
 
 
 def send_friendship_request(request):
-    recipients_list = User.objects.filter(username=username)
+    recipients_list = User.objects.filter(username=request.data['username'])
     if (recipients_list):
         recipient = recipients_list[0]
         sender = request.user
-        # проверка являются ли уже друзьями пользователи
+        # проверка являются ли уже друзьями пользователи или является ли заявка поаторной
         error_check = Friend.objects.filter(
-            user=recipient, friend=sender)
+            user=recipient, friend=sender) or FriendRequest.objects.filter(sender=sender, recipient=recipient)
         if error_check:
-            return Response({'status': 'error', 'message': 'Вы уже являетесь друзьями'})
+            return Response({'status': 'error', 'message': 'Вы уже являетесь друзьями или заявка отправлена'})
         friend_request, created = FriendRequest.objects.update_or_create(
             recipient=recipient, sender=sender)
         return Response({'status': 'ok', 'data': FriendRequestSerializer(friend_request).data})
@@ -88,8 +102,8 @@ def get_friendship_requests_addressed_to_us(request):
     friends_requests = FriendRequest.objects.filter(
         recipient=request.user)
     if friends_requests:
-        return Response(FriendRequestSerializer(friends_requests, many=True).data)
-    return Response({'status': 'empty'})
+        return Response({'ok': True, 'requests':FriendRequestSerializer(friends_requests, many=True).data})
+    return Response({'ok': False})
 
 
 def get_friends_list(request):
@@ -98,7 +112,8 @@ def get_friends_list(request):
 
 
 def accept_a_friendship_request(request):
-    accepted_request = FriendRequest.objects.filter(id=request.data['id'])
+    sender = User.objects.filter(username=request.data['username'])[0]
+    accepted_request = FriendRequest.objects.filter(sender=sender)
     if accepted_request:
         accepted_request[0].delete()
         user1 = accepted_request[0].recipient
@@ -127,8 +142,8 @@ def accept_a_friendship_request(request):
 
 
 def remove_from_friends_list(request):
-    id = request.data['id']
-    friend_to_delete = Friend.objects.filter(id=id)
+    user = User.objects.filter(username=request.data['username'])[0]
+    friend_to_delete = Friend.objects.filter(user=user)
     if friend_to_delete:
         friendship = Friend.objects.filter(
             user=friend_to_delete[0].user, friend=friend_to_delete[0].friend).delete()
@@ -150,3 +165,4 @@ def change_user_data(request):
         'date_of_birth': request.data['date_of_birth'],
     })
     return Response({'user_data': AdditionalUserDataSerializer(new_data).data})
+

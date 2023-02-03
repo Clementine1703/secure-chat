@@ -96,7 +96,7 @@ class UserReceivedMessage(models.Model):
         return self.user
 
 class UserReadedMessage(models.Model):
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='id чата')
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='сообщение')
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='id пользователя')
 
     class Meta:

@@ -1,6 +1,6 @@
 from main.models import AdditionalUserData, Chat, ChatUser, Message, UserReadedMessage, UserReceivedMessage, FriendRequest, Friend
 from django.contrib.auth.models import User
-from .services import *
+from main.services.views.services import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from main.serializers import AdditionalUserDataSerializer, UsersSearchDataSerializer, ChatSerializer, ChatUserSerializer, MessageSerializer, FriendRequestSerializer, FriendSerializer
