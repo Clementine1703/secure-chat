@@ -4,7 +4,7 @@ export default createStore({
     state:{
         data:{
             user: 'user',
-            websocket_connection: '',
+            websocket_connection: false,
         },
         auth_token: '',
         protocol: 'http://',

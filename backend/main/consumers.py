@@ -10,6 +10,7 @@ from main.serializers import UsersSearchDataSerializer
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
+        print(self.scope)
         # self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         # self.room_group_name = "chat_%s" % self.room_name
 
@@ -26,7 +27,6 @@ class ChatConsumer(WebsocketConsumer):
             self.user = model_token[0].user
             self.accept()
             self.send(text_data=json.dumps({"message": self.channel_name}))
-            print(self.channel_layer)
 
             #Вступаем  в группу
             async_to_sync(self.channel_layer.group_add)(

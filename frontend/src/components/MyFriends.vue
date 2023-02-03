@@ -90,6 +90,16 @@
           .catch((error) => {
             this.axios_response = error.response.data;
           })
+
+
+          this.$store.state.data.websocket_connection.send(
+            JSON.stringify({
+              type: 'friend',
+              action: 'send_request',
+              target: username,
+            })
+          )
+
     },
     get_friends_requests(){
           axios(
@@ -138,6 +148,10 @@
           .catch((error) => {
             this.axios_response = error.response.data;
           })
+
+
+
+
     },
 
     remove_from_friends(id){

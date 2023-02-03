@@ -43,8 +43,8 @@
           </transition>
         </div>
 
-        <div :class="{ show: (active_tab === 2) ,active: (active_tab === 2)}" class="tab-pane fade p-4" role="tabpanel">2</div>
-        <div :class="{ show: (active_tab === 3) ,active: (active_tab === 3)}" class="tab-pane fade p-4" role="tabpanel">3</div>
+        <!-- <div :class="{ show: (active_tab === 2) ,active: (active_tab === 2)}" class="tab-pane fade p-4" role="tabpanel">2</div>
+        <div :class="{ show: (active_tab === 3) ,active: (active_tab === 3)}" class="tab-pane fade p-4" role="tabpanel">3</div> -->
       </div>
 
 </template>

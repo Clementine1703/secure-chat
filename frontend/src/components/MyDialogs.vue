@@ -109,7 +109,6 @@ export default {
     flex-direction: column;
     width: 100%;
     height: 500px;
-    border: 2px solid black;
     margin: 30px 0;
     overflow: auto;
   }
@@ -117,17 +116,24 @@ export default {
   .dialog-shortcuts__item{
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    padding: 0;
     width: 100%;
     min-height: 90px;
-    border-bottom: 2px solid black;
     justify-content: space-around;
     cursor: pointer;
-    color: black;
+    color: white;
+    background-color: rgba(88, 181, 128, 0.98);
+    font-size: 25px;
+    text-transform: uppercase;
+    border-radius: 5px;
+  }
+
+  .dialog-shortcuts__item:first-child{
+    margin-top: 20px;
   }
 
   .dialog-shortcuts__item:hover{
-    color:  rgb(100, 182, 135);
+
   }
 
   .dialog-shortcuts__item.active{

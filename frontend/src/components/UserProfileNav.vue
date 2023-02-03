@@ -15,8 +15,8 @@ export default {
     return{
       nav_elements:[
         {title: 'Профиль', slug: 'profile', route_name: '', tab_number: 1},
-        {title: 'Сообщения', slug: 'messages', route_name: '', tab_number: 2},
-        {title: 'Настройки', slug: 'settings', route_name: '', tab_number: 3},
+        // {title: 'Сообщения', slug: 'messages', route_name: '', tab_number: 2},
+        // {title: 'Настройки', slug: 'settings', route_name: '', tab_number: 3},
 
       ]
     }
