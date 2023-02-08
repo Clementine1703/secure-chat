@@ -25,7 +25,7 @@ def get_not_read_messages(request):
         user = User.objects.get(id=request.user.id)
         message_readed = UserReadedMessage.objects.filter(message=message, user=user)
         if (message_readed):
-            message.delete()
+            messages = messages.exclude(message_id=message.message_id)
         else:
             write = UserReadedMessage(user=user, message=message)
             write.save()
