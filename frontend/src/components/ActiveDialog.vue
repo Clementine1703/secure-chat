@@ -63,9 +63,7 @@ export default {
     },
     //скроллим чат в конец
     scrollChatToBottom(){
-      this.$refs.dialogDetails.scrollTo(
-        0, this.$refs.dialogDetails.scrollHeight
-      )
+      this.$refs.dialogDetails.scrollTop = this.$refs.dialogDetails.scrollHeight
     },
     
     //получаем сообщения
@@ -85,6 +83,8 @@ export default {
 
           }
 
+      let dialogNeedsScrolling = false
+
       axios(config)
           .then((response) => {
             let result = response.data.messages;
@@ -94,12 +94,19 @@ export default {
               this.messages.push(result[i]);
               }
 
+              dialogNeedsScrolling = true
+
               //запоминаем свой id
               this.me = response.data.me
             }
           })
           .catch((error) => {
             alert(error)
+          })
+          .finally(()=>{
+            if (dialogNeedsScrolling){
+              this.scrollChatToBottom()
+            }
           })
     },
 
@@ -165,10 +172,12 @@ export default {
   mounted() {
     if (this.login_check()){
       this.get_messages(this.chat_id)
+
      // устанавливаем ежесекундный запрос к серверу проверяющий наличие обновлений
       this.updates_timer_id = setInterval(()=>{
       this.get_messages(this.chat_id, true)
       }, 2000)
+      
     }
   },
 
@@ -187,7 +196,7 @@ export default {
 
   .dialog-details{
     position: relative;
-    overflow: auto;
+    overflow-y: auto;
     width: 100%;
     height: 500px;
     margin: 30px 0;

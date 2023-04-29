@@ -67,6 +67,14 @@ export default {
 	margin: 30px 30px 30px 60px;
 }
 
+@media (max-width: 500px){
+	.side_bar_nav{
+		width: 100%;
+		display: flex;
+		position: relative;
+	}
+}
+
 .side_bar_nav__element{
 	display: flex;
 	flex-direction: row;

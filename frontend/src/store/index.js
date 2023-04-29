@@ -12,7 +12,7 @@ export default createStore({
         },
         auth_token: '',
         protocol: 'http://',
-        base_url: '127.0.0.1:8000',
+        base_url: 'localhost:8000',
     },
     getters:{},
     actions:{},

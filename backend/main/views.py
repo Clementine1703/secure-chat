@@ -26,7 +26,7 @@ class MessageViewSet(APIView):
             messages = get_not_read_messages(request)
         else:
             messages = get_all_messages(request)
-         # перебираем сообщения и записываем какие конкретно этот юзер прочитал, а какие - нет
+        # перебираем сообщения и записываем какие конкретно этот юзер прочитал, а какие - нет для корректного отображения на фронте
         messages = mark_messages_read_by_user(request, messages)
 
         return (Response({'messages': MessageSerializer(messages, many=True).data, 'me': request.user.username}))
@@ -73,3 +73,17 @@ class AdditionalUserDataViewSet(APIView):
 
     def post(self, request):
         return change_user_data(request)
+    
+
+
+
+
+
+
+
+# class JWTTest(APIView):
+#     def get(self, request):
+#         print(request.__dict__)
+#         a = JWTAuthentication()
+#         print(a.authenticate(request))
+#         return Response('ok') 
