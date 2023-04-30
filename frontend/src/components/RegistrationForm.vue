@@ -1,6 +1,6 @@
 <template>
   <form class="form shadow-lg rounded bg-white mt-5 px-5 py-4 mx-auto" action="#" @submit.prevent='register()'>
-    <standart-preloader v-if='loading' ></standart-preloader>
+    <standart-preloader v-if='preloader' ></standart-preloader>
     <h1 class="mb-4 text-center">Регистрация</h1>
     <div class="form-group my-3">
       <input v-model="email" type="text" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите почту">
@@ -25,6 +25,7 @@
 
 <script>
 import StandartPreloader from "@/assets/widgets/StandartPreloader";
+import { mapActions } from "vuex";
 
 export default {
 	name: 'RegistrationForm',
@@ -36,49 +37,25 @@ export default {
 			email: '',
       password: '',
       status_info: '',
-      loading: false,
+      preloader: false,
 		}
 	},
 	methods: {
+    ...mapActions(['SEND_A_USER_REGISTRATION_REQUEST_TO_THE_API']),
+
+    enable_preloader() {
+      this.preloader = true;
+    },
+
+    disable_preloader() {
+      this.preloader = false;
+    },
+
 		register() {
-      this.loading = true;
-      var axios = require('axios');
-      // var FormData = require('form-data');
-      // var data = new FormData();
+      
+      this.SEND_A_USER_REGISTRATION_REQUEST_TO_THE_API(this);
 
-      var config = {
-        method: 'post',
-        url: `${this.$store.state.protocol}${this.$store.state.base_url}/auth/users/`,
-        mode:'cors',
-        // headers: {
-          // ...data.getHeaders()
-        // },
-        data : {
-          'username': this.email,
-          'password': this.password,
-          'email': this.email,
-        }
-      };
-
-
-      axios(config)
-          .then((response) => {
-            if(JSON.stringify(response.status) === '201'){
-              this.status_info = 'Вы успешно зарегистрировались!';
-              setTimeout(()=>{
-                this.$router.push({name: 'authentication'});
-              }, 3000)
-
-            }
-
-
-          })
-          .catch((error) => {
-            this.status_info = error.response.data;
-          })
-          .finally(()=>{
-            this.loading = false;
-          });
+      
 		},
 	},
   mounted() {

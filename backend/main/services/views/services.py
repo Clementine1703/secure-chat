@@ -105,8 +105,10 @@ def send_friendship_request(request):
 
 
 def get_friendship_requests_addressed_to_us(request):
+    print('AAAA', request.user)
     friends_requests = FriendRequest.objects.filter(
         recipient=request.user)
+    print(friends_requests)
     if friends_requests:
         return Response({'ok': True, 'requests':FriendRequestSerializer(friends_requests, many=True).data})
     return Response({'ok': False})
@@ -165,7 +167,7 @@ def change_user_data(request):
     new_data, created = AdditionalUserData.objects.update_or_create(user_id=request.user.id, defaults={
         'name': request.data['name'],
         'user_id': request.user.id,
-        'user_status': request.data['user_status'],
+        'status': request.data['status'],
         'sex': request.data['sex'],
         'experience': request.data['experience'],
         'date_of_birth': request.data['date_of_birth'],

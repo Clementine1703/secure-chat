@@ -6,7 +6,7 @@ from rest_framework import serializers
 class AdditionalUserDataSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=60,read_only=True)
-    user_status = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
     date_of_birth = serializers.DateField(read_only=True)
     date_of_registration = serializers.DateTimeField(read_only=True)
     experience = serializers.CharField(max_length=2,read_only=True)

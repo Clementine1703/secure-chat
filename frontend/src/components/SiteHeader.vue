@@ -22,7 +22,7 @@
             <li class="nav-item offset-lg-2" v-if="this.$store.state.auth_token">
               <form class="form-inline d-flex" @submit.prevent>
                 <input v-model="users_search_value" class="form-control mr-sm-2" type="search" placeholder="Пользователь" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" @click="get_profile(users_search_value)">Искать</button>
+                <button class="btn btn-outline-success my-2 my-sm-0" @click="finds_users_by_username_from_api(users_search_value)">Искать</button>
               </form>
             </li>
 						<li class="nav-item" v-show="!this.$store.state.auth_token">
@@ -62,7 +62,7 @@
 <script>
 import { useRoute } from 'vue-router';
 import SmallProfile from "@/components/SmallProfile";
-import axios from "axios";
+import { mapActions } from 'vuex';
 
 export default {
 	name: 'SiteHeader',
@@ -94,27 +94,10 @@ export default {
     // alert(this.current_route_name)
   },
   methods:{
-    get_profile(value){
-      axios(
-          {
-            method: 'post',
-            url: `${this.$store.state.protocol}${this.$store.state.base_url}/api/profiles/`,
-            mode: 'cors',
-            headers: {
-              Authorization: `Token ${this.$store.state.auth_token}`,
-            },
-            data: {
-              'value': value,
-            }
-          }
-      )
-          .then((response) => {
-            console.log(response.data)
-            alert(JSON.stringify(response.data))
-          })
-          .catch((error) => {
-            this.axios_response = error.response.data;
-          })
+    ...mapActions(['FIND_USERS_BY_USERNAME_FROM_API']),
+
+    finds_users_by_username_from_api(username){
+      this.FIND_USERS_BY_USERNAME_FROM_API(username)
     }
   }
 }

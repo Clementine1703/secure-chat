@@ -40,9 +40,13 @@ def ws_friend_handler(consumer, request):
     user = User.objects.filter(username=data['username'])[0]
     group_id = user.group_id
 
+
     data = {
         'username': consumer.user.username
     }
+
+    print(consumer.user.username, 'BBBBB')
+    
     async_to_sync(consumer.channel_layer.group_send)(
         group_id, {"type": "send_data",
                    "message": json.dumps({'request': request, 'data': data})}
