@@ -17,12 +17,16 @@
 
 
 <script>
+import { mapMutations } from 'vuex';
+
 export default {
   name: 'SmallProfile',
   components:{},
   methods:{
+    ...mapMutations(['SET_AUTH_TOKEN']),
+
     logout(){
-      this.$store.state.auth_token = '';
+      this.SET_AUTH_TOKEN('')
       this.$cookies.remove('auth_token');
       this.$router.push({name: 'authentication'});
       // this.$cookies.remove('auto_login');

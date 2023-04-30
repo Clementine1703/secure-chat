@@ -1,11 +1,14 @@
 import { createStore } from "vuex";
 import axios from "axios";
 import router from '../router';
+import cookie from 'vue-cookies';
+
 
 export default createStore({
     state: {
         user: {
             auth_token: '',
+            username: '',
             additional_data: {
                 name: '',
                 status: '',
@@ -21,6 +24,13 @@ export default createStore({
             friends: [],
             friend_requests: [],
 
+        },
+
+        chats: {
+            chats_list: [],
+            active_chat: {
+                messages: []
+            }
         },
         data: {
             user: 'user',
@@ -59,6 +69,16 @@ export default createStore({
         GET_WEBSOCKET_CONNECTION(state) {
             return state.data.websocket_connection
         },
+        GET_CHATS_LIST(state) {
+            return state.chats.chats_list
+        },
+        GET_MESSAGES_LIST(state) {
+            return state.chats.active_chat.messages
+        },
+        GET_USERNAME(state) {
+            return state.user.username
+        }
+
 
     },
 
@@ -86,8 +106,29 @@ export default createStore({
             state.interaction_with_users.friend_requests = friend_requests_list
         },
 
-        REMOVE_USER_FROM_FRIENDS_LIST_STORE(state, element) {
-            let friends_list = state.interaction_with_users.friends
+        SET_AUTH_TOKEN(state, new_token) {
+            state.auth_token = new_token
+        },
+
+        SET_CHATS_LIST(state, chats_list) {
+            state.chats.chats_list = chats_list
+        },
+
+        SET_MESSAGES_LIST(state, messages) {
+            state.chats.active_chat.messages = messages
+        },
+        SET_USERNAME(state, username) {
+            state.user.username = username
+        },
+
+
+    },
+
+
+
+    actions: {
+        REMOVE_USER_FROM_FRIENDS_LIST_STORE({ getters }, element) {
+            let friends_list = getters.GET_FRIENDS_LIST
 
             for (let list_el of friends_list) {
                 if (list_el.friend == element.friend) {
@@ -98,22 +139,22 @@ export default createStore({
 
         },
 
-        ADD_USER_TO_FRIENDS_LIST_STORE(state, element) {
-            let friends_list = state.interaction_with_users.friends
+        ADD_USER_TO_FRIENDS_LIST_STORE({ getters }, element) {
+            let friends_list = getters.GET_FRIENDS_LIST
 
             friends_list.push(element)
 
         },
 
-        ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE(state, element) {
-            let friend_requsets_list = state.interaction_with_users.friend_requests
+        ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE({ getters }, element) {
+            let friend_requsets_list = getters.GET_FRIEND_REQUESTS_LIST
 
             friend_requsets_list.push(element)
 
         },
 
-        REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE(state, element) {
-            let friend_requests_list = state.interaction_with_users.friend_requests
+        REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE({ getters }, element) {
+            let friend_requests_list = getters.GET_FRIEND_REQUESTS_LIST
 
 
             for (let list_el of friend_requests_list) {
@@ -125,34 +166,70 @@ export default createStore({
 
         },
 
+        SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS({ getters, dispatch }) {
+            let websocket_connection = getters.GET_WEBSOCKET_CONNECTION
 
-    },
+            websocket_connection.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+
+                if (data.message.request) {
+                    if (data.message.request.type === 'friend') {
+                        console.log(data.message.request)
+                        // когда принимают нашу заявку
+                        if (data.message.request.action === 'add') {
+                            dispatch('ADD_USER_TO_FRIENDS_LIST_STORE', { friend: data.message.data.username })
+                        }
+                        //когда нам кидают завку
+                        if (data.message.request.action === 'send_request') {
+                            dispatch('ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE', { sender: data.message.data.username })
+                        }
+                        if (data.message.request.action === 'remove') {
+                            dispatch('REMOVE_USER_FROM_FRIENDS_LIST_STORE', { friend: data.message.data.username })
+                        }
+                    }
+                }
+
+            };
+        },
+
+        RESET_WEBSOCKET_EVENT_HANDLER({ getters }) {
+            let websocket_connection = getters.GET_WEBSOCKET_CONNECTION
+
+            websocket_connection.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+                console.log(data.message)
+            };
+
+        },
 
 
 
-    actions: {
+
         GET_ADDITIONAL_USER_DATA_FROM_API({ commit, getters }) {
             let protocol = getters.GET_PROTOCOL
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
 
-            axios(
-                {
-                    method: 'get',
-                    url: `${protocol}${base_url}/api/`,
-                    mode: 'cors',
-                    headers: {
-                        Authorization: `Token ${auth_token}`,
+            return new Promise((resolve, reject) => {
+                axios(
+                    {
+                        method: 'get',
+                        url: `${protocol}${base_url}/api/`,
+                        mode: 'cors',
+                        headers: {
+                            Authorization: `Token ${auth_token}`,
+                        }
                     }
-                }
-            )
-                .then((response) => {
-                    let additional_user_data = response.data.user_data[0];
-                    commit('SET_ADDITIONAL_USER_DATA', additional_user_data)
-                })
-                .catch((error) => {
-                    throw new Error('Сould not get data from the server', { cause: error })
-                })
+                )
+                    .then((response) => {
+                        let additional_user_data = response.data.user_data[0];
+                        commit('SET_ADDITIONAL_USER_DATA', additional_user_data)
+                        resolve('Успешно!')
+                    })
+                    .catch((error) => {
+                        reject(new Error('Сould not get data from the server', { cause: error }))
+                    })
+            })
         },
 
         POST_ADDITIONAL_USER_DATA_TO_API({ getters }, additional_user_data) {
@@ -160,31 +237,32 @@ export default createStore({
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
 
-            axios(
-                {
-                    method: 'post',
-                    url: `${protocol}${base_url}/api/`,
-                    mode: 'cors',
-                    headers: {
-                        Authorization: `Token ${auth_token}`,
-                    },
-                    data: {
-                        name: additional_user_data.name,
-                        status: additional_user_data.status,
-                        sex: additional_user_data.sex,
-                        experience: additional_user_data.experience,
-                        date_of_birth: additional_user_data.date_of_birth,
-                    }
-                }
-            )
-                .then((response) => {
-                    let data = response.data.user_data
-                    console.log(data)
+            return new Promise((resolve, reject) => {
 
-                })
-                .catch((error) => {
-                    throw new Error('Failed to establish a connection with the server', { cause: error })
-                })
+                axios(
+                    {
+                        method: 'post',
+                        url: `${protocol}${base_url}/api/`,
+                        mode: 'cors',
+                        headers: {
+                            Authorization: `Token ${auth_token}`,
+                        },
+                        data: {
+                            name: additional_user_data.name,
+                            status: additional_user_data.status,
+                            sex: additional_user_data.sex,
+                            experience: additional_user_data.experience,
+                            date_of_birth: additional_user_data.date_of_birth,
+                        }
+                    }
+                )
+                    .then(() => {
+                        resolve('Изменения успешно сохранены!')
+                    })
+                    .catch((error) => {
+                        reject(new Error('Failed to establish a connection with the server', { cause: error }))
+                    })
+            })
         },
 
 
@@ -214,41 +292,90 @@ export default createStore({
                 })
         },
 
-        SEND_A_USER_REGISTRATION_REQUEST_TO_THE_API({ getters }, component) {
+        REDIRECT_TO_THE_PAGE({ getters }, name) {
+            console.log(getters)
+            router.push({ name: name });
+        },
+
+        PLACE_USER_AUTHORIZATION_DATA_IN_COOKIES(email, password) {
+            cookie.set('auto_login', email);
+            cookie.set('auto_password', password);
+        },
+
+        GET_USER_AUTHORIZATION_DATA_FROM_COOKIES() {
+            return (cookie.get('auto_login'), this.$cookies.get('auto_password'));
+        },
+
+        AUTHORIZE_THE_USER({ getters, commit, dispatch }, userdata) {
             let protocol = getters.GET_PROTOCOL
             let base_url = getters.GET_BASE_URL
 
-            component.enable_preloader();
-
-            console.log(component.email)
 
 
-            axios({
-                method: 'post',
-                url: `${protocol}${base_url}/auth/users/`,
-                mode: 'cors',
-                data: {
-                    'username': component.email,
-                    'password': component.password,
-                    'email': component.email,
-                }
-            })
-                .then((response) => {
-                    console.log(response)
-                    if (JSON.stringify(response.status) === '201') {
-                        component.status_info = 'Вы успешно зарегистрировались!';
-                        setTimeout(() => {
-                            router.push({ name: 'authentication' });
-                        }, 3000)
-
+            return new Promise((resolve, reject) => {
+                axios({
+                    method: 'post',
+                    url: `${protocol}${base_url}/auth/token/login/`,
+                    mode: 'cors',
+                    data: {
+                        'username': userdata.email,
+                        'password': userdata.password,
                     }
-
                 })
-                .catch((error) => {
-                    component.status_info = error.response.data;
-                })
+                    .then((response) => {
+                        console.log(response)
+                        commit('SET_AUTH_TOKEN', response.data.auth_token);
+                        cookie.set('auth_token', getters.GET_AUTH_TOKEN);
+                        cookie.set('auto_login', '');
+                        cookie.set('auto_password', '')
+                        if (userdata.remember_me) {
+                            dispatch('PLACE_USER_AUTHORIZATION_DATA_IN_COOKIES');
+                        }
+                        router.push({ name: 'main' });
 
-            component.disable_preloader();
+                        resolve('Успешно!')
+                    })
+                    .catch((error) => {
+                        reject(error.response.data)
+                    })
+            })
+        },
+
+        SEND_A_USER_REGISTRATION_REQUEST_TO_THE_API({ getters }, userdata) {
+            let protocol = getters.GET_PROTOCOL
+            let base_url = getters.GET_BASE_URL
+
+
+            return new Promise((resolve, reject) => {
+                axios({
+                    method: 'post',
+                    url: `${protocol}${base_url}/auth/users/`,
+                    mode: 'cors',
+                    data: {
+                        'username': userdata.email,
+                        'password': userdata.password,
+                        'email': userdata.email,
+                    }
+                })
+                    .then((response) => {
+                        console.log('b')
+                        console.log(response)
+                        if (JSON.stringify(response.status) === '201') {
+                            setTimeout(() => {
+                                router.push({ name: 'authentication' });
+                            }, 3000)
+
+                        }
+                        resolve('Вы успешно зарегистрировались!')
+                    })
+                    .catch((error) => {
+                        reject(error.response.data)
+                    })
+            })
+
+
+
+
         },
 
         GET_ALL_USERS_FROM_API({ commit, getters }, value = '') {//если value = '', то вернутся все пользователи
@@ -350,7 +477,7 @@ export default createStore({
                 })
         },
 
-        ACCEPT_A_FRIEND_REQUEST({ getters, commit }, username) {
+        ACCEPT_A_FRIEND_REQUEST({ getters, dispatch }, username) {
             let protocol = getters.GET_PROTOCOL
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
@@ -384,8 +511,8 @@ export default createStore({
                     console.log(response.data.ok)
                     if (response.data.ok == true) {
                         console.log('aboboa')
-                        commit('ADD_USER_TO_FRIENDS_LIST_STORE', { friend: username })
-                        commit('REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE', { sender: username })
+                        dispatch('ADD_USER_TO_FRIENDS_LIST_STORE', { friend: username })
+                        dispatch('REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE', { sender: username })
                     }
 
                 })
@@ -417,7 +544,7 @@ export default createStore({
                 })
         },
 
-        REMOVE_USER_FROM_FRIENDS_LIST_API({ getters, commit }, username) {
+        REMOVE_USER_FROM_FRIENDS_LIST_API({ getters, dispatch }, username) {
             let protocol = getters.GET_PROTOCOL
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
@@ -449,7 +576,7 @@ export default createStore({
                             }
                         })
                         )
-                        commit('REMOVE_USER_FROM_FRIENDS_LIST_STORE', { friend: username })
+                        dispatch('REMOVE_USER_FROM_FRIENDS_LIST_STORE', { friend: username })
 
                     } else {
                         alert(response.data.message)
@@ -459,6 +586,205 @@ export default createStore({
                     console.error(error.response.data);
                 })
         },
+
+        GET_USER_CHATS_LIST_FROM_API({ getters, commit }, chat_name = '') {
+            let protocol = getters.GET_PROTOCOL
+            let base_url = getters.GET_BASE_URL
+            let auth_token = getters.GET_AUTH_TOKEN
+
+            axios(
+                {
+                    method: 'post',
+                    url: `${protocol}${base_url}/api/chat/get`,
+                    mode: 'cors',
+                    headers: {
+                        Authorization: `Token ${auth_token}`,
+                    },
+                    data: {
+                        chat_name: chat_name,
+                    }
+
+                }
+            )
+                .then((response) => {
+                    let chats_list = []
+                    let result = response.data;
+                    for (let i in result) {
+                        chats_list.push(result[i]);
+                    }
+                    commit('SET_CHATS_LIST', chats_list);
+                })
+                .catch(() => {
+                    alert('Ошибка запроса к серверу');
+                })
+        },
+
+        GET_ALL_MESSAGES_FROM_API({ getters, commit }, configurations) {
+            let protocol = getters.GET_PROTOCOL
+            let base_url = getters.GET_BASE_URL
+            let auth_token = getters.GET_AUTH_TOKEN
+
+
+
+            return new Promise((resolve, reject) => {
+                axios({
+                    method: 'post',
+                    url: `${protocol}${base_url}/api/message/get`,
+                    mode: 'cors',
+                    headers: {
+                        Authorization: `Token ${auth_token}`,
+                    },
+                    data: {
+                        chat_id: configurations.chat_id,
+                        check_updates: false,
+                    },
+
+                })
+                    .then((response) => {
+                        let result = response.data.messages;
+                        //если есть новое сообщение
+                        if (result.length) {
+                            let messages = []
+                            for (let i in result) {
+                                messages.push(result[i]);
+                            }
+                            commit('SET_MESSAGES_LIST', messages)
+
+
+
+                            //запоминаем свой id
+                            commit('SET_USERNAME', response.data.me)
+                        }
+                        resolve(true)
+                    })
+                    .catch((error) => {
+                        reject(error)
+                    })
+            })
+        },
+
+        GET_NEW_MESSAGES_FROM_API({ getters, commit, dispatch }, configurations) {
+            let protocol = getters.GET_PROTOCOL
+            let base_url = getters.GET_BASE_URL
+            let auth_token = getters.GET_AUTH_TOKEN
+
+
+            let dialogNeedsScrolling = false
+
+            return new Promise((resolve, reject) => {
+                axios({
+                    method: 'post',
+                    url: `${protocol}${base_url}/api/message/get`,
+                    mode: 'cors',
+                    headers: {
+                        Authorization: `Token ${auth_token}`,
+                    },
+                    data: {
+                        chat_id: configurations.chat_id,
+                        check_updates: true,
+                    },
+
+                })
+                    .then((response) => {
+                        let result = response.data.messages;
+                        //если есть новое сообщение
+                        if (result.length) {
+                            let messages = []
+                            for (let i in result) {
+                                messages.push(result[i]);
+                            }
+
+                            for (let i in messages){
+                                messages[i].you_read = false
+                                console.log(messages[i])
+                                dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', messages[i])
+                            }
+
+
+                            dialogNeedsScrolling = true
+
+                            //запоминаем свой id
+                            commit('SET_USERNAME', response.data.me)
+                        }
+                        resolve(dialogNeedsScrolling)
+                    })
+                    .catch((error) => {
+                        reject(error)
+                    })
+            })
+        },
+
+        POST_NEW_MESSAGE_TO_API({ getters, dispatch }, configurations) {
+            let protocol = getters.GET_PROTOCOL
+            let base_url = getters.GET_BASE_URL
+            let auth_token = getters.GET_AUTH_TOKEN
+
+
+            return new Promise((resolve, reject) => {
+                axios(
+                    {
+                        method: 'post',
+                        url: `${protocol}${base_url}/api/message/post`,
+                        mode: 'cors',
+                        headers: {
+                            Authorization: `Token ${auth_token}`,
+                        },
+                        data: {
+                            chat_id: configurations.chat_id,
+                            content: configurations.content,
+                        },
+
+                    }
+                )
+                    .then((request) => {
+                        //получаем непрочитанные сообщения
+                        // this.get_messages(chat_id, true)
+                        request.data.you_read = true
+                        dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', request.data)
+                        // this.new_message = ''
+                        // this.scrollChatToBottom()
+                        resolve('Успешно!')
+                    })
+                    .catch((error) => {
+                       reject(error)
+                    })
+            })
+        },
+
+        ADD_MESSAGE_TO_MESSAGES_LIST_STORE({ getters }, message){
+            let messages_list = getters.GET_MESSAGES_LIST
+
+            messages_list.push(message)
+        },
+
+        MARK_THE_MESSAGE_AS_READ_API({ getters }, message) {
+            let protocol = getters.GET_PROTOCOL
+            let base_url = getters.GET_BASE_URL
+            let auth_token = getters.GET_AUTH_TOKEN
+
+            axios(
+                {
+                  method: 'post',
+                  url: `${protocol}${base_url}/api/message/read`,
+                  mode: 'cors',
+                  headers: {
+                    Authorization: `Token ${auth_token}`,
+                  },
+                  data: {
+                    message_id: message.message_id,
+                  }
+        
+                }
+              )
+                .then((response) => {
+                  if (response.status == 200) {
+                    message.you_read = true
+                  }
+                })
+                .catch(() => {
+                  console.error('Не удалось прочитать сообщение')
+                })
+        }
 
 
     },

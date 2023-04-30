@@ -27,7 +27,7 @@ class MessageViewSet(APIView):
         else:
             messages = get_all_messages(request)
         # перебираем сообщения и записываем какие конкретно этот юзер прочитал, а какие - нет для корректного отображения на фронте
-        messages = mark_messages_read_by_user(request, messages)
+        messages = sort_messages_into_read_and_unread_before_sending(request, messages)
 
         return (Response({'messages': MessageSerializer(messages, many=True).data, 'me': request.user.username}))
 

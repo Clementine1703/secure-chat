@@ -52,8 +52,8 @@ def get_all_messages(request):
 
     return messages
 
-
-def mark_messages_read_by_user(request, messages):
+#штука которая перед отправкой сообщений помечает прочитал пользователь собщение или нет для его удобства (you read)
+def sort_messages_into_read_and_unread_before_sending(request, messages):
     for message in messages:
         print(message.message_id)
         readed = UserReadedMessage.objects.filter(

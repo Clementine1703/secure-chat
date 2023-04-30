@@ -58,8 +58,8 @@ export default {
     ...mapGetters(['GET_ALL_USERS_LIST', 'GET_FRIEND_REQUESTS_LIST', 'GET_FRIENDS_LIST']),
   },
   methods: {
-    ...mapActions(['GET_ALL_USERS_FROM_API', 'SEND_FRIENDS_REQUEST_TO_USER', 'GET_FRIEND_REQUESTS_FROM_API', 'GET_FRIENDS_LIST_FROM_API', 'REMOVE_USER_FROM_FRIENDS_LIST_API', 'ACCEPT_A_FRIEND_REQUEST']),
-    ...mapMutations(['SET_FRIENDS_LIST', 'SET_FRIEND_REQUESTS_LIST', 'REMOVE_USER_FROM_FRIENDS_LIST_STORE', 'ADD_USER_TO_FRIENDS_LIST_STORE', 'ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE' , 'REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE']),
+    ...mapActions(['GET_ALL_USERS_FROM_API', 'SEND_FRIENDS_REQUEST_TO_USER', 'GET_FRIEND_REQUESTS_FROM_API', 'GET_FRIENDS_LIST_FROM_API', 'REMOVE_USER_FROM_FRIENDS_LIST_API', 'ACCEPT_A_FRIEND_REQUEST', 'REMOVE_USER_FROM_FRIENDS_LIST_STORE', 'ADD_USER_TO_FRIENDS_LIST_STORE', 'ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE' , 'REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE', 'SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS', 'RESET_WEBSOCKET_EVENT_HANDLER']),
+    ...mapMutations(['SET_FRIENDS_LIST', 'SET_FRIEND_REQUESTS_LIST', ]),
 
     get_all_users_from_api() {
 
@@ -88,38 +88,22 @@ export default {
     get_friends() {
       this.GET_FRIENDS_LIST_FROM_API()
     },
+
+    override_websocket_event_handler() {
+
+
+      
+    }
   },
   mounted() {
     this.get_all_users_from_api()
     this.get_friends_requests()
     this.get_friends()
-    this.$store.state.data.websocket_connection.onmessage = (e) => {
-      const data = JSON.parse(e.data);
+    this.SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS()
 
-      if (data.message.request) {
-        if (data.message.request.type === 'friend') {
-          console.log(data.message.request)
-          // когда принимают нашу заявку
-          if (data.message.request.action === 'add') {
-            this.ADD_USER_TO_FRIENDS_LIST_STORE({friend: data.message.data.username})
-          }
-          //когда нам кидают завку
-          if (data.message.request.action === 'send_request') {
-            this.ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE({sender: data.message.data.username})
-          }
-          if (data.message.request.action === 'remove') {
-            this.REMOVE_USER_FROM_FRIENDS_LIST_STORE({friend: data.message.data.username})
-          }
-        }
-      }
-
-    };
   },
   unmounted() {
-    this.$store.state.data.websocket_connection.onmessage = function (e) {
-      const data = JSON.parse(e.data);
-      console.log(data.message)
-    };
+    this.RESET_WEBSOCKET_EVENT_HANDLER()
   }
 }
 </script>

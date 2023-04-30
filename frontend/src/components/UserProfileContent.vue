@@ -30,7 +30,8 @@
             <input type="date" id="birth_date" name="birth_date" v-model="GET_ADDITIONAL_USER_DATA.date_of_birth"
               min="1900-01-01" max="2023-12-31">
 
-            <button type="button" class="btn btn-success my-3" @click="post_additional_user_data_to_api()">Изменить</button>
+            <button type="button" class="btn btn-success my-3"
+              @click="post_additional_user_data_to_api()">Изменить</button>
           </div>
         </div>
 
@@ -80,27 +81,31 @@ export default {
     },
 
 
-    get_additional_user_data_from_api() {
+    async get_additional_user_data_from_api() {
       this.enable_preloader()
-      try {
-        this.GET_ADDITIONAL_USER_DATA_FROM_API(); //to store
-      }
-      catch (error) {
-        this.show_alert(error.message)
-      }
-      this.disable_preloader()
+      this.GET_ADDITIONAL_USER_DATA_FROM_API()
+        .catch((error) => {
+          this.show_alert(error.message)
+        })
+        .finally(() => {
+          this.disable_preloader()
+        })
+
     },
 
-    post_additional_user_data_to_api() {
+    async post_additional_user_data_to_api() {
       this.enable_preloader()
-      try {
-        this.POST_ADDITIONAL_USER_DATA_TO_API(this.GET_ADDITIONAL_USER_DATA);
-        this.disable_preloader()
-        this.show_alert('Изменения успешно сохранены!')
-      }
-      catch (error) {
-        this.show_alert(error.message)
-      }
+      this.POST_ADDITIONAL_USER_DATA_TO_API(this.GET_ADDITIONAL_USER_DATA)
+        .then((message) => {
+          this.show_alert(message)
+        })
+        .catch((error) => {
+          this.show_alert(error)
+        })
+        .finally(() => {
+          this.disable_preloader()
+        })
+
     },
 
 
