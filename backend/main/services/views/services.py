@@ -17,38 +17,38 @@ def get_chat_by_string(request):
     return (Response(ChatSerializer(chats, many=True).data))
 
 
-def get_not_read_messages(request):
-    messages = Message.objects.filter(chat_id=request.data['chat_id'], read=False).exclude(
-        user=User.objects.get(id=request.user.id))
-    # в момент получения сообщения помечаем что ЭТОТ ПОЛЬЗОВАТЕЛЬ его получил, чтобы больше не получать его при подобном запросе (временно)
-    for message in messages:
-        user = User.objects.get(id=request.user.id)
-        message_readed = UserReadedMessage.objects.filter(message=message, user=user)
-        if (message_readed):
-            messages = messages.exclude(message_id=message.message_id)
-        else:
-            write = UserReadedMessage(user=user, message=message)
-            write.save()
+# def get_not_read_messages(request):
+#     messages = Message.objects.filter(chat_id=request.data['chat_id'], read=False).exclude(
+#         user=User.objects.get(id=request.user.id))
+#     # в момент получения сообщения помечаем что ЭТОТ ПОЛЬЗОВАТЕЛЬ его получил, чтобы больше не получать его при подобном запросе (временно)
+#     for message in messages:
+#         user = User.objects.get(id=request.user.id)
+#         message_readed = UserReadedMessage.objects.filter(message=message, user=user)
+#         if (message_readed):
+#             messages = messages.exclude(message_id=message.message_id)
+#         else:
+#             write = UserReadedMessage(user=user, message=message)
+#             write.save()
 
-        #Если ВСЕ УЧАСТНИКИ чата получили сообщение - помечаем как полученное всеми
-        if len(ChatUser.objects.filter(chat=request.data['chat_id'])) == len(UserReadedMessage.objects.filter(message=message)):
+#         #Если ВСЕ УЧАСТНИКИ чата получили сообщение - помечаем как полученное всеми
+#         if len(ChatUser.objects.filter(chat=request.data['chat_id'])) == len(UserReadedMessage.objects.filter(message=message)):
 
-            message.read = True
-            message.save()
+#             message.read = True
+#             message.save()
 
-    return messages
+#     return messages
 
 
 def get_all_messages(request):
     messages = Message.objects.filter(chat_id=request.data['chat_id'])
 
-    #помечаем все неполученные ранее сообщения как полученные ЭТИМ ПОЛЬЗОВАТЕЛЕМ
-    for message in messages:
-        user = User.objects.get(id=request.user.id)
-        message_readed = UserReadedMessage.objects.filter(message=message, user=user)
-        if not message_readed:
-            write = UserReadedMessage(user=user, message=message)
-            write.save()
+    # #помечаем все неполученные ранее сообщения как полученные ЭТИМ ПОЛЬЗОВАТЕЛЕМ
+    # for message in messages:
+    #     user = User.objects.get(id=request.user.id)
+    #     message_readed = UserReadedMessage.objects.filter(message=message, user=user)
+    #     if not message_readed:
+    #         write = UserReadedMessage(user=user, message=message)
+    #         write.save()
 
     return messages
 
@@ -67,7 +67,7 @@ def sort_messages_into_read_and_unread_before_sending(request, messages):
 
 def create_new_message(request):
     message = Message(
-        chat_id=request.data['chat_id'], content=request.data['content'], user_id=request.user.id, read=False)
+        chat_id=request.data['chat_id'], content=request.data['content'], user_id=request.user.id)
     message.save()
     return Response(MessageSerializer(message).data)
 

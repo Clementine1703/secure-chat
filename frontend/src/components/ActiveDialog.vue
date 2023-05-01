@@ -44,10 +44,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['GET_USERNAME', 'GET_MESSAGES_LIST'])
+    ...mapGetters(['GET_USERNAME', 'GET_MESSAGES_LIST', 'GET_WEBSOCKET_CONNECTION'])
   },
   methods: {
-    ...mapActions(['GET_NEW_MESSAGES_FROM_API', 'GET_ALL_MESSAGES_FROM_API', 'POST_NEW_MESSAGE_TO_API', 'MARK_THE_MESSAGE_AS_READ_API']),
+    ...mapActions(['GET_NEW_MESSAGES_FROM_API', 'GET_ALL_MESSAGES_FROM_API', 'POST_NEW_MESSAGE_TO_API', 'MARK_THE_MESSAGE_AS_READ_API', 'START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET', 'SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES']),
 
     login_check() {
       if (!this.$store.state.auth_token) {
@@ -110,10 +110,16 @@ export default {
     if (this.login_check()) {
       this.get_all_messages(this.chat_id)
 
+      this.GET_WEBSOCKET_CONNECTION.onopen = ()=>{
+        this.START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET(this.chat_id)
+      }
+
+
+      this.SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES()
       // устанавливаем ежесекундный запрос к серверу проверяющий наличие обновлений
-      this.updates_timer_id = setInterval(() => {
-        this.get_new_messages(this.chat_id, true)
-      }, 2000)
+      // this.updates_timer_id = setInterval(() => {
+      //   this.get_new_messages(this.chat_id, true)
+      // }, 2000)
 
     }
   },

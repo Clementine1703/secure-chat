@@ -172,7 +172,11 @@ export default createStore({
             websocket_connection.onmessage = (e) => {
                 const data = JSON.parse(e.data);
 
-                if (data.message.request) {
+                if (data.is_a_service_information){
+                    return true
+                }
+
+                if (data.message.request && !data.service_information) {
                     if (data.message.request.type === 'friend') {
                         console.log(data.message.request)
                         // когда принимают нашу заявку
@@ -192,12 +196,62 @@ export default createStore({
             };
         },
 
+        SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES({ getters, dispatch }) {
+            console.log('установили')
+
+            let websocket_connection = getters.GET_WEBSOCKET_CONNECTION
+
+            console.log(websocket_connection)
+
+            websocket_connection.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+
+                //если придет служебное сообщение по типу имени канала
+                if (data.is_a_service_information){
+                    return true
+                }
+
+                if (data.message.request) {
+
+                    let message = data.message.request.data.message
+
+                    if (data.message.request.type === 'message') {
+                        console.log(data.message.request)
+                        // когда принимают нашу заявку
+                        if (data.message.request.action === 'send') {
+                            //если это сообщение в вебсокеты отправили не мы
+                            if (message.user != getters.GET_USERNAME){
+                                message.you_read = false
+                                dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', message)
+                            }
+                        }
+                    }
+                }
+
+            };
+
+        },
+
+        START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET({ getters }, chat_id) {
+            let websocket_connection = getters.GET_WEBSOCKET_CONNECTION
+
+
+            websocket_connection.send(JSON.stringify({
+                type: 'chat',
+                action: 'connect',
+                data: {
+                    chat_id: chat_id,
+                }
+            }))
+            console.log(websocket_connection)
+        },
+
         RESET_WEBSOCKET_EVENT_HANDLER({ getters }) {
             let websocket_connection = getters.GET_WEBSOCKET_CONNECTION
 
             websocket_connection.onmessage = function (e) {
                 const data = JSON.parse(e.data);
-                console.log(data.message)
+                console.log(data.service_information)
             };
 
         },
@@ -694,7 +748,7 @@ export default createStore({
                                 messages.push(result[i]);
                             }
 
-                            for (let i in messages){
+                            for (let i in messages) {
                                 messages[i].you_read = false
                                 console.log(messages[i])
                                 dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', messages[i])
@@ -718,6 +772,7 @@ export default createStore({
             let protocol = getters.GET_PROTOCOL
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
+            let websocket_connection = getters.GET_WEBSOCKET_CONNECTION
 
 
             return new Promise((resolve, reject) => {
@@ -737,21 +792,29 @@ export default createStore({
                     }
                 )
                     .then((request) => {
-                        //получаем непрочитанные сообщения
-                        // this.get_messages(chat_id, true)
-                        request.data.you_read = true
+                        let message = request.data
+                        //это сообзение сразу прочитанно нами
+                        message.you_read = true
                         dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', request.data)
-                        // this.new_message = ''
-                        // this.scrollChatToBottom()
+                        
+                        //но не прочитанно тем, кому мы его отправляем по вебсокетам
+                        websocket_connection.send(JSON.stringify({
+                            type: 'message',
+                            action: 'send',
+                            data: {
+                                message: message,
+                            }
+                        }))
+
                         resolve('Успешно!')
                     })
                     .catch((error) => {
-                       reject(error)
+                        reject(error)
                     })
             })
         },
 
-        ADD_MESSAGE_TO_MESSAGES_LIST_STORE({ getters }, message){
+        ADD_MESSAGE_TO_MESSAGES_LIST_STORE({ getters }, message) {
             let messages_list = getters.GET_MESSAGES_LIST
 
             messages_list.push(message)
@@ -764,25 +827,25 @@ export default createStore({
 
             axios(
                 {
-                  method: 'post',
-                  url: `${protocol}${base_url}/api/message/read`,
-                  mode: 'cors',
-                  headers: {
-                    Authorization: `Token ${auth_token}`,
-                  },
-                  data: {
-                    message_id: message.message_id,
-                  }
-        
+                    method: 'post',
+                    url: `${protocol}${base_url}/api/message/read`,
+                    mode: 'cors',
+                    headers: {
+                        Authorization: `Token ${auth_token}`,
+                    },
+                    data: {
+                        message_id: message.message_id,
+                    }
+
                 }
-              )
+            )
                 .then((response) => {
-                  if (response.status == 200) {
-                    message.you_read = true
-                  }
+                    if (response.status == 200) {
+                        message.you_read = true
+                    }
                 })
                 .catch(() => {
-                  console.error('Не удалось прочитать сообщение')
+                    console.error('Не удалось прочитать сообщение')
                 })
         }
 

@@ -52,7 +52,7 @@ class Chat(models.Model):
         verbose_name_plural = "Список чатов"
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 # Списки участников чата
@@ -65,7 +65,7 @@ class ChatUser(models.Model):
         verbose_name_plural = "Участники чата"
 
     def __str__(self):
-        return self.user.username
+        return str(self.user.username)
 
 
 # Списки сообщений
@@ -75,14 +75,13 @@ class Message(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='id пользователя')
     content = models.CharField(max_length=500, verbose_name='контент')
     date_create = models.DateTimeField(editable=False, auto_now_add=True, verbose_name='дата создания')
-    read = models.BooleanField(default=False, verbose_name="прочитано")
 
     class Meta:
         verbose_name = 'Список сообщений'
         verbose_name_plural = "Список сообщений"
 
     def __str__(self):
-        return self.content
+        return str(self.content)
 
 class UserReceivedMessage(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='id чата')
@@ -93,7 +92,7 @@ class UserReceivedMessage(models.Model):
         verbose_name_plural = 'Пользователи получившие сообщение'
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
 class UserReadedMessage(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='сообщение')
@@ -104,7 +103,7 @@ class UserReadedMessage(models.Model):
         verbose_name_plural = 'Пользователи прочитавшие сообщение'
 
     def __str__(self):
-        return self.user
+        return str(self.user)
     
 
 class FriendRequest(models.Model):
@@ -116,7 +115,7 @@ class FriendRequest(models.Model):
         verbose_name_plural = 'Заявки в друзья'
 
     def __str__(self):
-        return self.sender.username
+        return str(self.sender.username)
 
 class Friend(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='пользователь')

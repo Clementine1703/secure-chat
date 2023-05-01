@@ -38,7 +38,7 @@ export default {
 
       this.$store.state.data.websocket_connection.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        console.log(data.message)
+        console.log(data.data)
       };
 
       this.$store.state.data.websocket_connection.onclose = () => {

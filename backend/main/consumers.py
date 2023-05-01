@@ -10,6 +10,7 @@ from main.services.consumers.services import *
 # {
 #     friend:['add', 'remove', 'send_request'],
 #     message:['send', 'remove'],
+    # chat:['connect', ''],
 # }
 
 
@@ -24,10 +25,17 @@ class ChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         request = json.loads(text_data)
-        # self.send(text_data=json.dumps({"message": data}))
 
         if (request['type'] == 'friend'):
             ws_friend_handler(self, request)
+
+        if (request['type'] == 'message'):
+            ws_message_handler(self, request)
+
+        if (request['type'] == 'chat' and request['action'] == 'connect'):
+            ws_connect_to_chat(self, request)
+            print(request['data'])
+
 
 
     # Receive message from room group

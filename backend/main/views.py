@@ -20,12 +20,7 @@ class ChatViewSet(APIView):
 
 class MessageViewSet(APIView):
     def post(self, request):
-        messages = []
-        # check_updates = True, значит возвращаем только сообщения с read = False, Иначе возвращаем все сообщения
-        if (request.data['check_updates']):
-            messages = get_not_read_messages(request)
-        else:
-            messages = get_all_messages(request)
+        messages = get_all_messages(request)
         # перебираем сообщения и записываем какие конкретно этот юзер прочитал, а какие - нет для корректного отображения на фронте
         messages = sort_messages_into_read_and_unread_before_sending(request, messages)
 
