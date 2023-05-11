@@ -7,8 +7,8 @@ import VueCookies from 'vue-cookies'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 
-
-createApp(App)
+const app = createApp(App)
+app
     .use(store)
     .use(router)
     .use(VueCookies)

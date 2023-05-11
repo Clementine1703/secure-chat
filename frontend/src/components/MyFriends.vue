@@ -55,11 +55,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['GET_ALL_USERS_LIST', 'GET_FRIEND_REQUESTS_LIST', 'GET_FRIENDS_LIST']),
+    ...mapGetters(['GET_ALL_USERS_LIST', 'GET_FRIEND_REQUESTS_LIST', 'GET_FRIENDS_LIST', 'GET_WEBSOCKET_CONNECTION']),
   },
   methods: {
-    ...mapActions(['GET_ALL_USERS_FROM_API', 'SEND_FRIENDS_REQUEST_TO_USER', 'GET_FRIEND_REQUESTS_FROM_API', 'GET_FRIENDS_LIST_FROM_API', 'REMOVE_USER_FROM_FRIENDS_LIST_API', 'ACCEPT_A_FRIEND_REQUEST', 'REMOVE_USER_FROM_FRIENDS_LIST_STORE', 'ADD_USER_TO_FRIENDS_LIST_STORE', 'ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE' , 'REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE', 'SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS', 'RESET_WEBSOCKET_EVENT_HANDLER']),
-    ...mapMutations(['SET_FRIENDS_LIST', 'SET_FRIEND_REQUESTS_LIST', ]),
+    ...mapActions(['GET_ALL_USERS_FROM_API', 'SEND_FRIENDS_REQUEST_TO_USER', 'GET_FRIEND_REQUESTS_FROM_API', 'GET_FRIENDS_LIST_FROM_API', 'REMOVE_USER_FROM_FRIENDS_LIST_API', 'ACCEPT_A_FRIEND_REQUEST', 'REMOVE_USER_FROM_FRIENDS_LIST_STORE', 'ADD_USER_TO_FRIENDS_LIST_STORE', 'ADD_REQUEST_TO_FRIEND_REQUESTS_LIST_STORE', 'REMOVE_REQUEST_FROM_FRIEND_REQUESTS_LIST_STORE', 'SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS', 'RESET_WEBSOCKET_EVENT_HANDLER']),
+    ...mapMutations(['SET_FRIENDS_LIST', 'SET_FRIEND_REQUESTS_LIST',]),
 
     get_all_users_from_api() {
 
@@ -92,14 +92,29 @@ export default {
     override_websocket_event_handler() {
 
 
-      
+
     }
   },
   mounted() {
-    this.get_all_users_from_api()
-    this.get_friends_requests()
-    this.get_friends()
-    this.SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS()
+    if (this.GET_WEBSOCKET_CONNECTION.readyState == WebSocket.OPEN) {
+      //Если вебсокет-соединение открыто, то просто меняем обработчик событий
+      //и получаем списки пользователей, заявок и друзей
+      this.SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS()
+
+      this.get_all_users_from_api()
+      this.get_friends_requests()
+      this.get_friends()
+    } else {
+      //Если закрыто, то меняем обработчик событий когда соединение откроется
+      //и получаем списки пользователей, заявок и друзей
+      this.GET_WEBSOCKET_CONNECTION.onopen = () => {
+        this.SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS()
+
+        this.get_all_users_from_api()
+        this.get_friends_requests()
+        this.get_friends()
+      }
+    }
 
   },
   unmounted() {

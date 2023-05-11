@@ -1,5 +1,9 @@
 <template>
   <div class="container">
+    <form action="#" @submit.prevent="post_message(this.chat_id, new_message)" class="new-message-form">
+      <input type="text" v-model="new_message" placeholder="Текст сообщения" @input.prevent required>
+      <button>Отправить</button>
+    </form>
     <div class="dialog-details" ref="dialogDetails">
       <div v-for="element in GET_MESSAGES_LIST" class="dialog-details__message"
         :class="{ 'my-message': element.user == GET_USERNAME, 'float-start': element.user != GET_USERNAME, 'new': element.you_read == false }"
@@ -13,10 +17,7 @@
         </div>
 
       </div>
-      <form action="#" @submit.prevent="post_message(this.chat_id, new_message)" class="new-message-form">
-        <input type="text" v-model="new_message" placeholder="Текст сообщения" @input.prevent required>
-        <button>Отправить</button>
-      </form>
+
 
       <!-- <div class="dialog-details__message">
         Привет, друг! Чем мы займемся на этой неделе?
@@ -28,7 +29,7 @@
 
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   name: 'ActiveDialog',
@@ -47,6 +48,7 @@ export default {
     ...mapGetters(['GET_USERNAME', 'GET_MESSAGES_LIST', 'GET_WEBSOCKET_CONNECTION'])
   },
   methods: {
+    ...mapMutations(['SET_MESSAGES_LIST']),
     ...mapActions(['GET_NEW_MESSAGES_FROM_API', 'GET_ALL_MESSAGES_FROM_API', 'POST_NEW_MESSAGE_TO_API', 'MARK_THE_MESSAGE_AS_READ_API', 'START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET', 'SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES']),
 
     login_check() {
@@ -74,6 +76,7 @@ export default {
         })
         .catch((error) => {
           console.error(error)
+          alert(error)
         })
     },
 
@@ -81,7 +84,7 @@ export default {
 
       this.GET_NEW_MESSAGES_FROM_API({ chat_id: chat_id, check_updates: check_updates })
         .then(() => {
-
+          this.scrollChatToBottom()
         })
         .catch((error) => {
           console.error(error)
@@ -108,10 +111,18 @@ export default {
 
   mounted() {
     if (this.login_check()) {
-      this.get_all_messages(this.chat_id)
-
-      this.GET_WEBSOCKET_CONNECTION.onopen = ()=>{
+      if (this.GET_WEBSOCKET_CONNECTION.readyState == WebSocket.OPEN) {
+        //Если вебсокет-соединение открыто, то просто меняем обработчик событий, 
+        //после получаем все сообщения
         this.START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET(this.chat_id)
+        this.get_all_messages(this.chat_id)
+      } else {
+        //Если закрыто, то меняем обработчик событий когда соединение откроется,
+        //после получаем все сообщения
+        this.GET_WEBSOCKET_CONNECTION.onopen = () => {
+          this.START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET(this.chat_id)
+          this.get_all_messages(this.chat_id)
+        }
       }
 
 
@@ -126,6 +137,7 @@ export default {
 
   unmounted() {
     clearInterval(this.updates_timer_id)
+    this.SET_MESSAGES_LIST([])
   }
 
 
@@ -158,33 +170,26 @@ export default {
   float: right;
 }
 
-.dialog-details__message.new {
-  color: red;
-}
-
-
-
-
-.dialog-details__message:not(.my-message)::before {
+.dialog-details__message:not(.my-message).new::before {
   content: '';
   position: absolute;
-  width: 0;
-  height: 0;
-  border: 15px transparent solid;
-  border-top: 15px rgb(100, 182, 135) solid;
-  bottom: -25px;
-  left: 20px;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+  right: -30px;
+  top: 0;
 }
 
-.dialog-details__message.my-message::after {
+.dialog-details__message.my-message.new::after {
   content: '';
   position: absolute;
-  width: 0;
-  height: 0;
-  border: 15px transparent solid;
-  border-top: 15px rgb(100, 182, 135) solid;
-  bottom: -25px;
-  right: 20px;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  border-radius: 50%;
+  left: -30px;
+  top: 0;
 }
 
 .dialog-details__username {
@@ -193,11 +198,11 @@ export default {
 }
 
 .new-message-form {
-  position: sticky;
+  position: absolute;
   display: flex;
   width: 100%;
   height: 40px;
-  bottom: 0;
+  top: 100%;
 }
 
 .new-message-form input {
@@ -207,9 +212,5 @@ export default {
 
 .new-message-form button {
   width: 20%;
-}
-
-.new{
-  color: red;
 }
 </style>

@@ -35,6 +35,7 @@ export default createStore({
         data: {
             user: 'user',
             websocket_connection: false,
+            websocket_indicator: true,
             friends: {
                 friends: [],
                 friend_requests: []
@@ -42,7 +43,7 @@ export default createStore({
         },
         auth_token: '',
         protocol: 'http://',
-        base_url: 'localhost:8000',
+        base_url: '192.168.137.27:8000',
     },
     getters: {
         GET_PROTOCOL(state) {
@@ -69,6 +70,9 @@ export default createStore({
         GET_WEBSOCKET_CONNECTION(state) {
             return state.data.websocket_connection
         },
+        GET_WEBSOCKET_INDICATOR(state){
+            return state.data.websocket_indicator
+        },
         GET_CHATS_LIST(state) {
             return state.chats.chats_list
         },
@@ -94,6 +98,14 @@ export default createStore({
             state.user.additional_data.date_of_registration = additional_user_data.date_of_registration
         },
 
+        SET_WEBSOCKET_CONNECTION(state, websocket_connection){
+            state.data.websocket_connection = websocket_connection
+        },
+
+        SET_WEBSOCKET_INDICATOR(state, websocket_indicator){
+            state.data.websocket_indicator = websocket_indicator
+        },
+
         SET_ALL_USERS_LIST(state, all_users_list) {
             state.interaction_with_users.users = all_users_list
         },
@@ -117,6 +129,7 @@ export default createStore({
         SET_MESSAGES_LIST(state, messages) {
             state.chats.active_chat.messages = messages
         },
+
         SET_USERNAME(state, username) {
             state.user.username = username
         },
@@ -358,6 +371,10 @@ export default createStore({
 
         GET_USER_AUTHORIZATION_DATA_FROM_COOKIES() {
             return (cookie.get('auto_login'), this.$cookies.get('auto_password'));
+        },
+
+        REMOVE_AUTH_TOKEN_FROM_COOKIES(){
+            cookie.remove('auth_token');
         },
 
         AUTHORIZE_THE_USER({ getters, commit, dispatch }, userdata) {
@@ -697,7 +714,7 @@ export default createStore({
                     .then((response) => {
                         let result = response.data.messages;
                         //если есть новое сообщение
-                        if (result.length) {
+                        if (result) {
                             let messages = []
                             for (let i in result) {
                                 messages.push(result[i]);
@@ -709,6 +726,13 @@ export default createStore({
                             //запоминаем свой id
                             commit('SET_USERNAME', response.data.me)
                         }
+
+                        //Если есть сообщение об ошибке, вызываем исключение
+                        let error_text = response.data.error
+                        if (error_text){
+                            throw new Error(error_text)
+                        }
+
                         resolve(true)
                     })
                     .catch((error) => {
@@ -722,8 +746,6 @@ export default createStore({
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
 
-
-            let dialogNeedsScrolling = false
 
             return new Promise((resolve, reject) => {
                 axios({
@@ -754,13 +776,10 @@ export default createStore({
                                 dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', messages[i])
                             }
 
-
-                            dialogNeedsScrolling = true
-
                             //запоминаем свой id
                             commit('SET_USERNAME', response.data.me)
                         }
-                        resolve(dialogNeedsScrolling)
+                        resolve(true)
                     })
                     .catch((error) => {
                         reject(error)

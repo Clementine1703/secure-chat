@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from main.serializers import AdditionalUserDataSerializer, UsersSearchDataSerializer, ChatSerializer, ChatUserSerializer, MessageSerializer, FriendRequestSerializer, FriendSerializer
 from main.models import AdditionalUserData, Chat, ChatUser, Message, UserReadedMessage, UserReceivedMessage, FriendRequest, Friend
 
+class MessagesException(Exception):
+    def __init__(self, text):
+        self.txt = text
+
 def get_users_by_string(request):
     data = User.objects.filter(
         username__startswith=request.data['value']).exclude(id=request.user.id)
@@ -40,7 +44,12 @@ def get_chat_by_string(request):
 
 
 def get_all_messages(request):
-    messages = Message.objects.filter(chat_id=request.data['chat_id'])
+    chat_id = request.data['chat_id']
+    if (ChatUser.objects.filter(chat=chat_id, user=request.user)):
+        messages = Message.objects.filter(chat_id=chat_id)
+        return messages
+    else:
+        raise MessagesException('У вас нет доступа к этому чату')
 
     # #помечаем все неполученные ранее сообщения как полученные ЭТИМ ПОЛЬЗОВАТЕЛЕМ
     # for message in messages:
@@ -50,7 +59,6 @@ def get_all_messages(request):
     #         write = UserReadedMessage(user=user, message=message)
     #         write.save()
 
-    return messages
 
 #штука которая перед отправкой сообщений помечает прочитал пользователь собщение или нет для его удобства (you read)
 def sort_messages_into_read_and_unread_before_sending(request, messages):

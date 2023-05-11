@@ -1,12 +1,12 @@
 <template>
-	<nav class="header navbar fixed-top navbar-expand-lg navbar-light justify-content-between shadow-sm bg-white rounded">
+	<nav class="header navbar fixed-top navbar-expand-lg navbar-light justify-content-between bg-white rounded">
 		<div class="container ">
 			<router-link :to="{name: 'main'}" class="navbar-brand ">
 				<img src="@/assets/images/logo.png" width="30" height="30" class="d-inline-block align-top" alt=""
 					loading="lazy">
 				Scrumers
       </router-link>
-			<button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas"
+			<button style="z-index: 9999;" class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas"
 				data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
 				<span class="navbar-toggler-icon"></span>
 			</button>

@@ -20,11 +20,13 @@ class ChatViewSet(APIView):
 
 class MessageViewSet(APIView):
     def post(self, request):
-        messages = get_all_messages(request)
-        # перебираем сообщения и записываем какие конкретно этот юзер прочитал, а какие - нет для корректного отображения на фронте
-        messages = sort_messages_into_read_and_unread_before_sending(request, messages)
-
-        return (Response({'messages': MessageSerializer(messages, many=True).data, 'me': request.user.username}))
+        try:
+            messages = get_all_messages(request)
+            # перебираем сообщения и записываем какие конкретно этот юзер прочитал, а какие - нет для корректного отображения на фронте
+            messages = sort_messages_into_read_and_unread_before_sending(request, messages)
+            return (Response({'messages': MessageSerializer(messages, many=True).data, 'me': request.user.username}))
+        except MessagesException as e:
+            return (Response({'error': e.txt}))
 
 
 class NewMessageViewSet(APIView):

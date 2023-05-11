@@ -7,6 +7,7 @@
 <script>
 import SiteHeader from "@/components/SiteHeader";
 import WebsocketConnectionIndicator from "./components/WebsocketConnectionIndicator.vue";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: 'App',
@@ -14,41 +15,40 @@ export default {
     SiteHeader,
     WebsocketConnectionIndicator,
   },
+  computed: {
+    ...mapGetters(['GET_WEBSOCKET_CONNECTION', 'GET_BASE_URL', 'GET_AUTH_TOKEN']),
+  },
 
   methods: {
+    ...mapMutations(['SET_WEBSOCKET_CONNECTION','SET_WEBSOCKET_INDICATOR', 'SET_AUTH_TOKEN']),
     get_token_from_cookies() {
       if (this.$cookies.get('auth_token')) {
-        this.$store.state.auth_token = this.$cookies.get('auth_token');
+        this.SET_AUTH_TOKEN(this.$cookies.get('auth_token'))
       }
-    },
-
-    my_click() {
-      const chatSocket = this.$store.state.data.websocket_connection
-      chatSocket.send(JSON.stringify({ mesage: 'message' }))
-
     },
 
     create_ws_connection() {
       const chatSocket = new WebSocket(
-        `ws://${this.$store.state.base_url}/chat/`
-        + `?token=${this.$store.state.auth_token}`
+        `ws://${this.GET_BASE_URL}/chat/`
+        + `?token=${this.GET_AUTH_TOKEN}`
       );
 
-      this.$store.state.data.websocket_connection = chatSocket
+      this.SET_WEBSOCKET_CONNECTION(chatSocket)
+      this.SET_WEBSOCKET_INDICATOR(false)
 
-      this.$store.state.data.websocket_connection.onmessage = function (e) {
+
+
+      chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         console.log(data.data)
       };
 
-      this.$store.state.data.websocket_connection.onclose = () => {
-        this.$store.state.data.websocket_connection = false
+      chatSocket.onclose = () => {
+        this.SET_WEBSOCKET_CONNECTION(false)
+        this.SET_WEBSOCKET_INDICATOR(true)
         console.error('Подключение прервано');
-
-
       };
     }
-
   },
 
   mounted() {
@@ -56,10 +56,10 @@ export default {
 
     this.create_ws_connection()
     setInterval(() => {
-      if (!this.$store.state.data.websocket_connection) {
+      if (!this.GET_WEBSOCKET_CONNECTION && this.GET_AUTH_TOKEN) {
         this.create_ws_connection()
       }
-    }, 5000)
+    }, 3000)
   },
 
 }
