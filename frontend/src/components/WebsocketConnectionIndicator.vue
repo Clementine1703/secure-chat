@@ -1,17 +1,19 @@
 <template>
-  <div class="indicator" v-if="GET_WEBSOCKET_INDICATOR">
+  <div class="indicator" v-if="GET_WEBSOCKET_INDICATOR && GET_AUTH_TOKEN">
+    <standart-preloader class="loading"></standart-preloader>
   </div>
 </template>
   
 <script>
 import { mapGetters } from 'vuex';
+import StandartPreloader from '@/assets/widgets/StandartPreloader.vue';
 
 export default {
   name: 'WebsocketConnectionIndicator',
-  components: {},
+  components: {StandartPreloader},
   props: ['websocketIndicator_is_visible'],
   computed: {
-    ...mapGetters(['GET_WEBSOCKET_CONNECTION', 'GET_WEBSOCKET_INDICATOR']),
+    ...mapGetters(['GET_WEBSOCKET_CONNECTION', 'GET_WEBSOCKET_INDICATOR', 'GET_AUTH_TOKEN']),
   },
 
 
@@ -21,19 +23,25 @@ export default {
   
 <style>
 .indicator {
-  width: 30px;
-  height: 30px;
+  position: relative;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background-color: red;
 }
 
-.indicator::after {
-  content: 'Подключение...';
-
+.indicator .wrapper{
+  background-color: transparent;
 }
 
-.indicator.connected {
-  background-color: green;
+.loading .preloader-3 svg{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  scale: 1;
+  stroke: black;
 }
+
+
 </style>
   

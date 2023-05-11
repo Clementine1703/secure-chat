@@ -1,4 +1,5 @@
 <template>
+  <standart-preloader v-if="preloader"></standart-preloader>
   <div class="container list users">
     <div>Пользователи сайта</div>
     <div class="list__item" v-for="user in GET_ALL_USERS_LIST" :key="user.username">
@@ -44,14 +45,17 @@
   
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import StandartPreloader from "@/assets/widgets/StandartPreloader.vue";
 
 export default {
   name: 'MyFriends',
+  components:{StandartPreloader},
   data() {
     return {
       users: [],
       friends: [],
       friends_requests: [],
+      preloader: true,
     }
   },
   computed: {
@@ -74,7 +78,7 @@ export default {
     },
 
     get_friends_requests() {
-      this.GET_FRIEND_REQUESTS_FROM_API()
+      this.GET_FRIEND_REQUESTS_FROM_API().then
     },
 
     add_to_friends(username) {
@@ -89,11 +93,26 @@ export default {
       this.GET_FRIENDS_LIST_FROM_API()
     },
 
-    override_websocket_event_handler() {
+    get_users_and_friends_and_requests(){
+      this.preloader = true;
+      new Promise((resolve, reject)=>{
+        try{
+          this.get_all_users_from_api()
+          this.get_friends_requests()
+          this.get_friends()
+          resolve(true)
+        }
+        catch(e){
+          reject(e)
+        }
+      }).then(()=>{
+        this.preloader = false
+      }).catch((e)=>{
+        console.error(e)
+        this.preloader = false
+      })
+    },
 
-
-
-    }
   },
   mounted() {
     if (this.GET_WEBSOCKET_CONNECTION.readyState == WebSocket.OPEN) {
@@ -101,18 +120,14 @@ export default {
       //и получаем списки пользователей, заявок и друзей
       this.SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS()
 
-      this.get_all_users_from_api()
-      this.get_friends_requests()
-      this.get_friends()
+      this. get_users_and_friends_and_requests()
     } else {
       //Если закрыто, то меняем обработчик событий когда соединение откроется
       //и получаем списки пользователей, заявок и друзей
       this.GET_WEBSOCKET_CONNECTION.onopen = () => {
         this.SET_WEBSOCKET_EVENT_HANDLER_INTERACTION_WITH_USERS()
 
-        this.get_all_users_from_api()
-        this.get_friends_requests()
-        this.get_friends()
+        this.get_users_and_friends_and_requests()
       }
     }
 

@@ -1,9 +1,6 @@
 <template>
   <div class="container">
-    <form action="#" @submit.prevent="post_message(this.chat_id, new_message)" class="new-message-form">
-      <input type="text" v-model="new_message" placeholder="Текст сообщения" @input.prevent required>
-      <button>Отправить</button>
-    </form>
+    <standart-preloader v-if="preloader"></standart-preloader>
     <div class="dialog-details" ref="dialogDetails">
       <div v-for="element in GET_MESSAGES_LIST" class="dialog-details__message"
         :class="{ 'my-message': element.user == GET_USERNAME, 'float-start': element.user != GET_USERNAME, 'new': element.you_read == false }"
@@ -11,18 +8,17 @@
         <div class="dialog-details__name">
           <span class="dialog-details__username"><em>{{ element.user }}</em></span>
         </div>
-
         <div class="dialog-details__content">
           {{ element.content }}
         </div>
-
       </div>
-
-
-      <!-- <div class="dialog-details__message">
-        Привет, друг! Чем мы займемся на этой неделе?
-      </div> -->
     </div>
+
+
+    <form action="#" @submit.prevent="post_message(this.chat_id, new_message)" class="new-message-form">
+      <input type="text" v-model="new_message" placeholder="Текст сообщения" @input.prevent required>
+      <button>Отправить</button>
+    </form>
   </div>
 </template>
 
@@ -30,10 +26,11 @@
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import StandartPreloader from "@/assets/widgets/StandartPreloader.vue";
 
 export default {
   name: 'ActiveDialog',
-  components: {},
+  components: { StandartPreloader },
   data() {
     return {
       chats: [],
@@ -42,25 +39,25 @@ export default {
       new_message: '',
       updates_timer_id: false,
       chat_id: this.$route.params.id,
+      preloader: true,
     }
   },
   computed: {
-    ...mapGetters(['GET_USERNAME', 'GET_MESSAGES_LIST', 'GET_WEBSOCKET_CONNECTION'])
+    ...mapGetters(['GET_USERNAME', 'GET_MESSAGES_LIST', 'GET_WEBSOCKET_CONNECTION', 'GET_AUTH_TOKEN'])
   },
   methods: {
     ...mapMutations(['SET_MESSAGES_LIST']),
-    ...mapActions(['GET_NEW_MESSAGES_FROM_API', 'GET_ALL_MESSAGES_FROM_API', 'POST_NEW_MESSAGE_TO_API', 'MARK_THE_MESSAGE_AS_READ_API', 'START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET', 'SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES']),
+    ...mapActions(['GET_NEW_MESSAGES_FROM_API', 'GET_ALL_MESSAGES_FROM_API', 'POST_NEW_MESSAGE_TO_API', 'MARK_THE_MESSAGE_AS_READ_API', 'START_LISTENING_NEW_MESSAGES_ON_WEBSOCKET', 'SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES', 'REDIRECT_TO_THE_PAGE', 'RESET_WEBSOCKET_EVENT_HANDLER']),
 
-    login_check() {
-      if (!this.$store.state.auth_token) {
-        this.$router.push({ name: "main" })
-        alert("Войдите в аккаунт")
-        return false
-      } else {
-        return true
-      }
 
+    enable_preloader() {
+      this.preloader = true;
     },
+
+    disable_preloader() {
+      this.preloader = false;
+    },
+
     //скроллим чат в конец
     scrollChatToBottom() {
       this.$refs.dialogDetails.scrollTop = this.$refs.dialogDetails.scrollHeight
@@ -72,7 +69,8 @@ export default {
 
       this.GET_ALL_MESSAGES_FROM_API({ chat_id: chat_id, check_updates: check_updates })
         .then(() => {
-          this.scrollChatToBottom()
+          this.scrollChatToBottom();
+          this.disable_preloader();
         })
         .catch((error) => {
           console.error(error)
@@ -110,7 +108,11 @@ export default {
   },
 
   mounted() {
-    if (this.login_check()) {
+    if (!this.GET_AUTH_TOKEN) {
+      this.REDIRECT_TO_THE_PAGE('authentication')
+    } else {
+
+
       if (this.GET_WEBSOCKET_CONNECTION.readyState == WebSocket.OPEN) {
         //Если вебсокет-соединение открыто, то просто меняем обработчик событий, 
         //после получаем все сообщения
@@ -124,19 +126,16 @@ export default {
           this.get_all_messages(this.chat_id)
         }
       }
-
-
       this.SET_WEBSOCKET_EVENT_HANDLER_TO_WORK_WITH_MESSAGES()
-      // устанавливаем ежесекундный запрос к серверу проверяющий наличие обновлений
-      // this.updates_timer_id = setInterval(() => {
-      //   this.get_new_messages(this.chat_id, true)
-      // }, 2000)
+
 
     }
+
+
   },
 
   unmounted() {
-    clearInterval(this.updates_timer_id)
+    this.RESET_WEBSOCKET_EVENT_HANDLER()
     this.SET_MESSAGES_LIST([])
   }
 

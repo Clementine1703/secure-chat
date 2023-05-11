@@ -79,10 +79,23 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
+
 
 export default {
 	name: 'HomePage',
 	components: {
+	},
+	computed:{
+		...mapGetters(['GET_AUTH_TOKEN'])
+	},
+	methods:{
+		...mapActions(['REDIRECT_TO_THE_PAGE'])
+	},
+	mounted(){
+		if (!this.GET_AUTH_TOKEN){
+			this.REDIRECT_TO_THE_PAGE('authentication')
+		}
 	}
 
 }
@@ -98,6 +111,17 @@ export default {
 .side_bar_nav {
 	width: 25%;
 	margin: 30px 30px 30px 60px;
+}
+
+.side_bar_nav {
+	overflow: auto;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.side_bar_nav::-webkit-scrollbar {
+	width: 0;
+	height: 0;
 }
 
 
@@ -157,7 +181,7 @@ a:visited {
 		display: flex;
 		position: relative;
 		height: auto;
-		margin: 30px 30px 0 0;
+		margin: 10px 30px 0 0;
 	}
 
 	.wrapper {

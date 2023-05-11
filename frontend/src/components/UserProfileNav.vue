@@ -1,6 +1,7 @@
 <template>
       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-        <a v-for="el in nav_elements" :key="el.tab_number" :class="{ active: (active_tab === el.tab_number)}" class="nav-link" @click.prevent = 'toggle_tab(el.tab_number)'>{{ el.title }}</a>
+        <a v-for="el in nav_elements" :key="el.tab_number" :class="{ active: (active_tab === el.tab_number)}" class="nav-link"
+         >{{ el.title }}</a>
       </div>
 </template>
 

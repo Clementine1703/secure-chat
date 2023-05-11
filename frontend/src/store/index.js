@@ -41,9 +41,8 @@ export default createStore({
                 friend_requests: []
             }
         },
-        auth_token: '',
         protocol: 'http://',
-        base_url: '192.168.137.27:8000',
+        base_url: 'localhost:8000',
     },
     getters: {
         GET_PROTOCOL(state) {
@@ -53,7 +52,7 @@ export default createStore({
             return state.base_url
         },
         GET_AUTH_TOKEN(state) {
-            return state.auth_token
+            return state.user.auth_token
         },
         GET_ADDITIONAL_USER_DATA(state) {
             return state.user.additional_data
@@ -70,7 +69,7 @@ export default createStore({
         GET_WEBSOCKET_CONNECTION(state) {
             return state.data.websocket_connection
         },
-        GET_WEBSOCKET_INDICATOR(state){
+        GET_WEBSOCKET_INDICATOR(state) {
             return state.data.websocket_indicator
         },
         GET_CHATS_LIST(state) {
@@ -98,11 +97,11 @@ export default createStore({
             state.user.additional_data.date_of_registration = additional_user_data.date_of_registration
         },
 
-        SET_WEBSOCKET_CONNECTION(state, websocket_connection){
+        SET_WEBSOCKET_CONNECTION(state, websocket_connection) {
             state.data.websocket_connection = websocket_connection
         },
 
-        SET_WEBSOCKET_INDICATOR(state, websocket_indicator){
+        SET_WEBSOCKET_INDICATOR(state, websocket_indicator) {
             state.data.websocket_indicator = websocket_indicator
         },
 
@@ -119,7 +118,7 @@ export default createStore({
         },
 
         SET_AUTH_TOKEN(state, new_token) {
-            state.auth_token = new_token
+            state.user.auth_token = new_token
         },
 
         SET_CHATS_LIST(state, chats_list) {
@@ -185,7 +184,7 @@ export default createStore({
             websocket_connection.onmessage = (e) => {
                 const data = JSON.parse(e.data);
 
-                if (data.is_a_service_information){
+                if (data.is_a_service_information) {
                     return true
                 }
 
@@ -220,7 +219,7 @@ export default createStore({
                 const data = JSON.parse(e.data);
 
                 //если придет служебное сообщение по типу имени канала
-                if (data.is_a_service_information){
+                if (data.is_a_service_information) {
                     return true
                 }
 
@@ -233,7 +232,7 @@ export default createStore({
                         // когда принимают нашу заявку
                         if (data.message.request.action === 'send') {
                             //если это сообщение в вебсокеты отправили не мы
-                            if (message.user != getters.GET_USERNAME){
+                            if (message.user != getters.GET_USERNAME) {
                                 message.you_read = false
                                 dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', message)
                             }
@@ -373,7 +372,7 @@ export default createStore({
             return (cookie.get('auto_login'), this.$cookies.get('auto_password'));
         },
 
-        REMOVE_AUTH_TOKEN_FROM_COOKIES(){
+        REMOVE_AUTH_TOKEN_FROM_COOKIES() {
             cookie.remove('auth_token');
         },
 
@@ -402,7 +401,7 @@ export default createStore({
                         if (userdata.remember_me) {
                             dispatch('PLACE_USER_AUTHORIZATION_DATA_IN_COOKIES');
                         }
-                        router.push({ name: 'main' });
+                        dispatch('REDIRECT_TO_THE_PAGE', 'main')
 
                         resolve('Успешно!')
                     })
@@ -663,31 +662,34 @@ export default createStore({
             let base_url = getters.GET_BASE_URL
             let auth_token = getters.GET_AUTH_TOKEN
 
-            axios(
-                {
-                    method: 'post',
-                    url: `${protocol}${base_url}/api/chat/get`,
-                    mode: 'cors',
-                    headers: {
-                        Authorization: `Token ${auth_token}`,
-                    },
-                    data: {
-                        chat_name: chat_name,
-                    }
+            return new Promise((resolve, reject) => {
+                axios(
+                    {
+                        method: 'post',
+                        url: `${protocol}${base_url}/api/chat/get`,
+                        mode: 'cors',
+                        headers: {
+                            Authorization: `Token ${auth_token}`,
+                        },
+                        data: {
+                            chat_name: chat_name,
+                        }
 
-                }
-            )
-                .then((response) => {
-                    let chats_list = []
-                    let result = response.data;
-                    for (let i in result) {
-                        chats_list.push(result[i]);
                     }
-                    commit('SET_CHATS_LIST', chats_list);
-                })
-                .catch(() => {
-                    alert('Ошибка запроса к серверу');
-                })
+                )
+                    .then((response) => {
+                        let chats_list = []
+                        let result = response.data;
+                        for (let i in result) {
+                            chats_list.push(result[i]);
+                        }
+                        commit('SET_CHATS_LIST', chats_list);
+                        resolve(true)
+                    })
+                    .catch((error) => {
+                        reject(error)
+                    })
+            })
         },
 
         GET_ALL_MESSAGES_FROM_API({ getters, commit }, configurations) {
@@ -729,7 +731,7 @@ export default createStore({
 
                         //Если есть сообщение об ошибке, вызываем исключение
                         let error_text = response.data.error
-                        if (error_text){
+                        if (error_text) {
                             throw new Error(error_text)
                         }
 
@@ -815,7 +817,7 @@ export default createStore({
                         //это сообзение сразу прочитанно нами
                         message.you_read = true
                         dispatch('ADD_MESSAGE_TO_MESSAGES_LIST_STORE', request.data)
-                        
+
                         //но не прочитанно тем, кому мы его отправляем по вебсокетам
                         websocket_connection.send(JSON.stringify({
                             type: 'message',

@@ -1,6 +1,7 @@
 <template>
   <div class="container d-flex">
     <div class="dialog-shortcuts">
+      <standart-preloader v-if="preloader"></standart-preloader>
       <form class="form-inline d-flex" @submit.prevent>
         <input v-model="chats_search_value" class="form-control mr-sm-2" type="search" placeholder="Имя чата"
           aria-label="Search" @input='GET_USER_CHATS_LIST_FROM_API(chats_search_value)'>
@@ -25,10 +26,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import StandartPreloader from "@/assets/widgets/StandartPreloader.vue";
 
 export default {
   name: 'MyDialogs',
-  components: {},
+  components: { StandartPreloader },
   data() {
     return {
       chats: [],
@@ -39,6 +41,7 @@ export default {
       new_message: '',
       chats_search_value: '',
       updates_timer_id: false,
+      preloader: false,
     }
   },
   computed: {
@@ -46,15 +49,30 @@ export default {
   },
   methods: {
     ...mapActions(['GET_USER_CHATS_LIST_FROM_API', 'REDIRECT_TO_THE_PAGE']),
+
+    enable_preloader() {
+      this.preloader = true;
+    },
+
+    disable_preloader() {
+      this.preloader = false;
+    },
   },
 
+
   mounted() {
-    if (this.GET_AUTH_TOKEN) {
-      this.GET_USER_CHATS_LIST_FROM_API();
+    if (!this.GET_AUTH_TOKEN) {
+      this.REDIRECT_TO_THE_PAGE('authentication')
     } else {
-      alert('войдите в аккаунт');
-      this.REDIRECT_TO_THE_PAGE('main')
+      this.enable_preloader()
+      this.GET_USER_CHATS_LIST_FROM_API().then(() => {
+        this.disable_preloader()
+      })
+        .catch((error) => {
+          console.error(error)
+        })
     }
+
   },
 }
 

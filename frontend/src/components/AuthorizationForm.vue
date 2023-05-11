@@ -47,7 +47,7 @@ export default {
     ...mapGetters(['GET_AUTH_TOKEN']),
   },
   methods: {
-    ...mapActions(['AUTHORIZE_THE_USER', 'REDIRECT_TO_THE_PAGE', 'GET_USER_AUTHORIZATION_DATA_FROM_COOKIES']),
+    ...mapActions(['AUTHORIZE_THE_USER', 'REDIRECT_TO_THE_PAGE', 'GET_USER_AUTHORIZATION_DATA_FROM_COOKIES', 'SET_WEBSOCKET_INDICATOR']),
 
 
     enable_preloader() {
@@ -65,6 +65,7 @@ export default {
       this.AUTHORIZE_THE_USER({ email: email, password: password, remember_me: remember_me }).then((result) => {
         this.password = '';
         this.status_info = result;
+        
       })
         .catch((error) => {
           this.status_info = error;
@@ -78,7 +79,7 @@ export default {
   },
   mounted() {
     if (this.GET_AUTH_TOKEN) {
-      this.REDIRECT_TO_THE_PAGE('main') //почему-то не работает
+      this.REDIRECT_TO_THE_PAGE('main')
     }
     try {
       this.email, this.password = this.GET_USER_AUTHORIZATION_DATA_FROM_COOKIES();
