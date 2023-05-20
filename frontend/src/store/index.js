@@ -41,6 +41,10 @@ export default createStore({
                 friend_requests: []
             }
         },
+        alerts: {
+            active_alerts: [
+            ]
+        },
         protocol: 'http://',
         base_url: 'localhost:8000',
     },
@@ -80,7 +84,10 @@ export default createStore({
         },
         GET_USERNAME(state) {
             return state.user.username
-        }
+        },
+        GET_ACTIVE_ALERTS(state){
+            return state.alerts.active_alerts
+        },
 
 
     },
@@ -133,12 +140,28 @@ export default createStore({
             state.user.username = username
         },
 
+        ADD_NEW_ALERT_TO_ACTIVE_ALERTS(state, alert){
+            state.alerts.active_alerts.push(alert);
+        },
+
+        DELETE_ALERT_FROM_ACTIVE_ALERTS(state, alert){
+            let index = state.alerts.active_alerts.indexOf(alert);
+            state.alerts.active_alerts.splice(index, 1)
+        },
+
 
     },
 
 
 
     actions: {
+        CALL_NEW_ALERT({ commit }, element){
+            commit('ADD_NEW_ALERT_TO_ACTIVE_ALERTS', element);
+            setTimeout(()=>{
+                commit('DELETE_ALERT_FROM_ACTIVE_ALERTS', element);
+            }, 3000)
+        },
+        
         REMOVE_USER_FROM_FRIENDS_LIST_STORE({ getters }, element) {
             let friends_list = getters.GET_FRIENDS_LIST
 

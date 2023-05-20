@@ -106,6 +106,7 @@ export default {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
+	position: relative;
 }
 
 .side_bar_nav {

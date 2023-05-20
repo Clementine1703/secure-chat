@@ -2,18 +2,21 @@
   <site-header></site-header>
   <websocket-connection-indicator class="indicator"></websocket-connection-indicator>
   <router-view></router-view>
+  <InformationAlert></InformationAlert>
 </template>
 
 <script>
 import SiteHeader from "@/components/SiteHeader";
 import WebsocketConnectionIndicator from "./components/WebsocketConnectionIndicator.vue";
 import { mapGetters, mapMutations } from "vuex";
+import InformationAlert from "./assets/widgets/InformationAlert.vue";
 
 export default {
   name: 'App',
   components: {
     SiteHeader,
     WebsocketConnectionIndicator,
+    InformationAlert
   },
   computed: {
     ...mapGetters(['GET_WEBSOCKET_CONNECTION', 'GET_BASE_URL', 'GET_AUTH_TOKEN']),
